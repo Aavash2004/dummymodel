@@ -8,6 +8,7 @@ import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 import { Toast, ToastViewport } from "@/app/components/ui/toast";
+import { EyeIcon, EyeOffIcon, Sparkles, ArrowRight, Handshake } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -19,6 +20,16 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateField = (field: "email" | "password", value: string) => {
+    const result = loginSchema.shape[field].safeParse(value);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: result.success ? undefined : result.error.issues[0].message,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +45,7 @@ export default function LoginPage() {
     }
 
     setErrors({});
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/users", {
@@ -49,71 +61,120 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok || data.success === false) {
-        setErrors({
-          email: data.error === "Invalid credentials" ? "Invalid email or password." : undefined,
-          password: data.error === "Invalid credentials" ? "Invalid email or password." : undefined,
-        });
-        setToast({ message: data.error || "Login failed.", type: "error" });
+        if (data.error === "Invalid credentials") {
+          setErrors({
+            email: "Invalid email or password.",
+            password: "Invalid email or password.",
+          });
+        } else {
+          setToast({ message: data.error || "Login failed.", type: "error" });
+        }
+        setIsSubmitting(false);
         return;
       }
 
       setToast({ message: "Logged in successfully.", type: "success" });
       router.push("/");
     } catch {
-      setErrors({
-        email: "Unable to reach the server right now.",
-        password: "Unable to reach the server right now.",
-      });
       setToast({ message: "Unable to reach the server right now.", type: "error" });
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.7),_transparent_55%)] px-6 py-20">
-      <Card className="w-full max-w-md border-white/60 bg-white/70 p-0 shadow-[0_20px_60px_rgba(2,4,1,0.08)] backdrop-blur-xl">
-        <CardHeader className="p-8 pb-4">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-zinc-500">Login</p>
-          <CardTitle className="mt-3 text-3xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to continue to your account.</CardDescription>
-        </CardHeader>
+    <main className="flex min-h-screen items-center justify-center bg-zinc-50/50 px-6 py-16 text-zinc-900">
+      <div className="w-full max-w-md space-y-6">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs">
+            <Handshake className="h-5 w-5" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-zinc-950">Intern App</span>
+        </div>
 
-        <CardContent className="p-8 pt-0">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Email</label>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@example.com"
-              />
-              {errors.email ? <p className="mt-1 text-sm text-red-600">{errors.email}</p> : null}
-            </div>
+        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl">
+          <CardHeader className="p-8 pb-4 text-center">
+            <CardTitle className="text-2xl font-bold tracking-tight text-zinc-950">Welcome back</CardTitle>
+            <CardDescription className="text-sm text-zinc-500">Sign in to manage your project workspace.</CardDescription>
+          </CardHeader>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Password</label>
-              <Input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••••"
-              />
-              {errors.password ? <p className="mt-1 text-sm text-red-600">{errors.password}</p> : null}
-            </div>
+          <CardContent className="p-8 pt-0">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                  Email Address
+                </label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => {
+                    setForm({ ...form, email: e.target.value });
+                    if (errors.email) validateField("email", e.target.value);
+                  }}
+                  onBlur={(e) => validateField("email", e.target.value)}
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  className="rounded-xl border-zinc-200 bg-zinc-50/50"
+                />
+                {errors.email ? <p className="mt-1 text-xs text-red-600">{errors.email}</p> : null}
+              </div>
 
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
-          </form>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={(e) => {
+                      setForm({ ...form, password: e.target.value });
+                      if (errors.password) validateField("password", e.target.value);
+                    }}
+                    onBlur={(e) => validateField("password", e.target.value)}
+                    placeholder="••••••••"
+                    className="pr-10 rounded-xl border-zinc-200 bg-zinc-50/50"
+                    disabled={isSubmitting}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 cursor-pointer"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.password ? <p className="mt-1 text-xs text-red-600">{errors.password}</p> : null}
+              </div>
 
-          <p className="mt-6 text-center text-sm text-zinc-600">
-            Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="font-medium text-zinc-950">
-              Sign up
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+              <Button
+                type="submit"
+                className="w-full rounded-full bg-zinc-950 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 cursor-pointer mt-2"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  "Logging in..."
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <span>Log in</span>
+                    <ArrowRight className="h-4 w-4 text-zinc-400" />
+                  </span>
+                )}
+              </Button>
+            </form>
+
+            <p className="mt-6 text-center text-xs text-zinc-500">
+              Don&apos;t have an account?{" "}
+              <Link href="/auth/signup" className="font-semibold text-zinc-950 hover:underline">
+                Sign up
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {toast ? (
         <ToastViewport>

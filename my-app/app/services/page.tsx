@@ -1,25 +1,50 @@
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export default function ServicesPage() {
   return (
-    <main className="min-h-screen bg-zinc-50 px-6 py-20 text-zinc-800">
-      <div className="mx-auto flex max-w-5xl flex-col gap-8 lg:flex-row lg:items-center">
-        <div className="max-w-2xl">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-zinc-500">
+    <main className="min-h-screen bg-zinc-50/50 px-6 py-12 sm:py-20 text-zinc-900">
+      <div className="mx-auto max-w-5xl space-y-16">
+        {/* Header */}
+        <div className="space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
             Services
           </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl">
+          <h1 className="text-4xl font-bold tracking-tight text-zinc-950 sm:text-5xl">
             Design, development, and support.
           </h1>
-          <p className="mt-6 text-lg leading-8 text-zinc-600">
-            We help shape clear product ideas into refined digital experiences with steady guidance from start to finish.
+          <p className="max-w-2xl text-lg text-zinc-600 leading-relaxed">
+            We help shape product ideas into clear, functional applications with clean structure.
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-[1.75rem] border border-white/40 bg-white/30 p-2 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md lg:w-[320px]">
-          <div className="relative h-72 w-full overflow-hidden rounded-[1.25rem]">
-            <Image src="/images/service.jpg" alt="Services illustration" fill className="object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent" />
+        {/* Image Showcase */}
+        <div className="overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-2 shadow-2xs">
+          <div className="relative h-72 w-full overflow-hidden rounded-2xl sm:h-96">
+            <Image
+              src="/images/service.jpg"
+              alt="Services showcase"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Clean Overview Card */}
+        <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs space-y-6 sm:p-10">
+          <h2 className="text-2xl font-bold text-zinc-950">Our Approach</h2>
+          <p className="text-sm leading-relaxed text-zinc-600">
+            We deliver straightforward solutions tailored to your requirements, prioritizing usability, performance, and clean code standards.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+            >
+              <span>Get in touch</span>
+              <ArrowRight className="h-4 w-4 text-zinc-400" />
+            </Link>
           </div>
         </div>
       </div>

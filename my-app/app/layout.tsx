@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import CursorEffect from "./cursor";
 import { Navbar } from "./components/Navbar";
+import { Footer } from "./components/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Northstar App",
-  description: "A modern homepage with routed pages",
+  title: "Intern App",
+  description: "A clean, modern, and minimalist web application.",
 };
 
 export default function RootLayout({
@@ -29,11 +30,13 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-zinc-50/50 text-zinc-900 selection:bg-zinc-900 selection:text-white">
         <CursorEffect />
         <Navbar />
-        {children}
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );
 }
+

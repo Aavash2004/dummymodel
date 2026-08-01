@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export type ToastType = "success" | "error";
 
@@ -18,10 +18,10 @@ export function Toast({ message, type = "success", onClose }: ToastProps) {
 
   return (
     <div
-      className={`rounded-2xl border px-4 py-3 text-sm font-medium shadow-lg backdrop-blur ${
+      className={`rounded-2xl border px-4 py-3 text-sm font-medium shadow-sm ${
         type === "success"
-          ? "border-emerald-200 bg-emerald-50/90 text-emerald-700"
-          : "border-red-200 bg-red-50/90 text-red-700"
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : "border-red-200 bg-red-50 text-red-700"
       }`}
     >
       {message}
