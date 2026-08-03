@@ -82,7 +82,12 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50/50 px-6 py-16 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-50/50 px-6 py-16 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute left-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-pink-300/40 blur-3xl" />
+        <div className="absolute right-[-4rem] top-20 h-72 w-72 rounded-full bg-cyan-300/35 blur-3xl" />
+        <div className="absolute bottom-[-3rem] left-1/3 h-60 w-60 rounded-full bg-violet-300/35 blur-3xl" />
+      </div>
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">

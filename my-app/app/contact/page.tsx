@@ -23,13 +23,14 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-zinc-50/50 px-6 py-12 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100 sm:py-20">
-      {/* Decorative background blobs for glass effect to catch */}
-      <div className="pointer-events-none absolute -top-24 left-1/4 h-72 w-72 rounded-full bg-blue-400/30 blur-3xl dark:bg-blue-500/20" />
-      <div className="pointer-events-none absolute top-1/3 right-1/4 h-72 w-72 rounded-full bg-purple-400/30 blur-3xl dark:bg-purple-500/20" />
-      <div className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-500/10" />
+    <main className="relative min-h-screen overflow-hidden bg-zinc-50 px-6 py-12 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 sm:py-20">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[500px] overflow-hidden">
+        <div className="absolute left-[-4rem] top-[-2rem] h-72 w-72 rounded-full bg-pink-300/40 blur-3xl" />
+        <div className="absolute right-[-3rem] top-8 h-80 w-80 rounded-full bg-blue-300/40 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/20 to-transparent dark:from-zinc-950/70 dark:via-zinc-950/20 dark:to-transparent" />
+      </div>
 
-      <div className="relative mx-auto max-w-5xl space-y-16">
+      <div className="relative z-10 mx-auto max-w-5xl space-y-16">
         {/* Header */}
         <div className="space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
@@ -45,12 +46,11 @@ export default function ContactPage() {
 
         {/* Contact Grid */}
         <div className="grid gap-10 lg:grid-cols-12">
-          {/* Form Card — Glassmorphism */}
-          <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/30 p-8 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 lg:col-span-7">
-            {/* Inner top highlight for glass sheen */}
-            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/40 via-transparent to-transparent dark:from-white/10" />
-
-            <div className="relative">
+          {/* Form Card — solid card with subtle glow ring */}
+          <div className="relative lg:col-span-7">
+            <div className="absolute inset-[-8px] rounded-[30px] bg-gradient-to-br from-pink-400/30 to-blue-400/30 blur-lg" />
+            <div className="relative overflow-hidden rounded-[24px] border border-zinc-200/80 bg-white p-8 shadow-xl dark:border-zinc-700/70 dark:bg-zinc-950 lg:col-span-7">
+              <div className="relative">
               {submitted ? (
                 <div className="flex flex-col items-center justify-center space-y-3 py-10 text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100/80 text-emerald-600 backdrop-blur-sm dark:bg-emerald-500/20 dark:text-emerald-400">
@@ -85,7 +85,7 @@ export default function ContactPage() {
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="Your name"
-                      className="rounded-xl border-white/40 bg-white/40 backdrop-blur-sm placeholder:text-zinc-500 focus:border-zinc-900 dark:border-white/10 dark:bg-white/5 dark:placeholder:text-zinc-500"
+                      className="rounded-xl border-zinc-200 bg-white placeholder:text-zinc-500 focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:placeholder:text-zinc-500"
                     />
                   </div>
 
@@ -99,7 +99,7 @@ export default function ContactPage() {
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="you@example.com"
-                      className="rounded-xl border-white/40 bg-white/40 backdrop-blur-sm placeholder:text-zinc-500 focus:border-zinc-900 dark:border-white/10 dark:bg-white/5 dark:placeholder:text-zinc-500"
+                      className="rounded-xl border-zinc-200 bg-white placeholder:text-zinc-500 focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:placeholder:text-zinc-500"
                     />
                   </div>
 
@@ -113,14 +113,14 @@ export default function ContactPage() {
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       placeholder="Your message..."
-                      className="w-full rounded-xl border border-white/40 bg-white/40 p-3 text-sm text-zinc-900 placeholder:text-zinc-500 backdrop-blur-sm focus:border-zinc-900 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                      className="w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-900 placeholder:text-zinc-500 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                     />
                   </div>
 
                   <Button
                     type="submit"
                     disabled={isSending}
-                    className="w-full cursor-pointer rounded-full bg-zinc-950/90 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-zinc-800 dark:bg-white/90 dark:text-zinc-950 dark:hover:bg-white"
+                    className="w-full cursor-pointer rounded-full bg-zinc-950 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-white"
                   >
                     {isSending ? "Sending..." : "Send Message"}
                   </Button>
@@ -128,6 +128,7 @@ export default function ContactPage() {
               )}
             </div>
           </div>
+        </div>
 
           {/* Info Card */}
           <div className="space-y-6 lg:col-span-5">

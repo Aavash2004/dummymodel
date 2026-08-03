@@ -38,7 +38,12 @@ const steps = [
 
 export default function ServicesPage() {
   return (
-    <main className="min-h-screen bg-zinc-50/50 px-6 py-12 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100 sm:py-20">
+    <main className="relative min-h-screen overflow-hidden bg-zinc-50/50 px-6 py-12 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100 sm:py-20">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute left-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-pink-300/40 blur-3xl" />
+        <div className="absolute right-[-5rem] top-24 h-72 w-72 rounded-full bg-cyan-300/35 blur-3xl" />
+        <div className="absolute bottom-[-3rem] left-1/3 h-60 w-60 rounded-full bg-violet-300/35 blur-3xl" />
+      </div>
       <div className="mx-auto max-w-5xl space-y-20">
         {/* Header */}
         <div className="space-y-4">
