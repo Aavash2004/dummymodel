@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function ServicesPage() {
   return (
-    <main className="min-h-screen bg-zinc-50/50 px-6 py-12 sm:py-20 text-zinc-900">
+    <main className="min-h-screen bg-zinc-50/50 px-6 py-12 sm:py-20 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
       <div className="mx-auto max-w-5xl space-y-16">
         {/* Header */}
         <div className="space-y-4">
@@ -20,7 +20,7 @@ export default function ServicesPage() {
         </div>
 
         {/* Image Showcase */}
-        <div className="overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-2 shadow-2xs">
+        <div className="overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-2 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
           <div className="relative h-72 w-full overflow-hidden rounded-2xl sm:h-96">
             <Image
               src="/images/service.jpg"
@@ -32,7 +32,7 @@ export default function ServicesPage() {
         </div>
 
         {/* Clean Overview Card */}
-        <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs space-y-6 sm:p-10">
+        <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs space-y-6 sm:p-10 dark:border-zinc-700/60 dark:bg-zinc-950/80">
           <h2 className="text-2xl font-bold text-zinc-950">Our Approach</h2>
           <p className="text-sm leading-relaxed text-zinc-600">
             We deliver straightforward solutions tailored to your requirements, prioritizing usability, performance, and clean code standards.

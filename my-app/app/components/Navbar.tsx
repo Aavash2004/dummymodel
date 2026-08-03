@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { X, Menu, Handshake, Search } from "lucide-react";
+import { useTheme } from "next-themes";
+import { X, Menu, Handshake, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 interface NavLink {
   href: string;
@@ -23,6 +25,10 @@ const TRANSITION_MS = 250;
 export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+
+  // Theme state
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [themeMounted, setThemeMounted] = useState(false);
 
   // Mobile drawer states
   const [open, setOpen] = useState(false);
@@ -56,6 +62,10 @@ export function Navbar() {
   };
 
   useEffect(() => {
+    setThemeMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!mounted) return;
     const id = requestAnimationFrame(() => setVisible(true));
     return () => cancelAnimationFrame(id);
@@ -84,12 +94,14 @@ export function Navbar() {
       >
         <div
           className={cn(
-            "mx-auto flex max-w-6xl items-center justify-between rounded-full border transition-all duration-300 px-4 py-2.5 sm:px-6",
+            "relative mx-auto flex max-w-6xl items-center justify-between overflow-hidden rounded-full border transition-all duration-300 px-4 py-2.5 sm:px-6",
             scrolled
               ? "border-zinc-200/80 bg-white/90 shadow-md backdrop-blur-xl ring-1 ring-black/5"
               : "border-zinc-200/60 bg-white/75 shadow-sm backdrop-blur-lg"
           )}
         >
+          <BorderBeam duration={7} size={100}  colorFrom="#1005e2" colorTo="#df0e1c " />
+
           {/* Brand Logo */}
           <Link
             href="/"
@@ -116,8 +128,8 @@ export function Navbar() {
                   className={cn(
                     "rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-zinc-100 text-zinc-950 font-semibold"
-                      : "text-zinc-600 hover:bg-zinc-100/60 hover:text-zinc-900"
+                      ? "bg-zinc-100 text-zinc-950 font-semibold dark:bg-zinc-800 dark:text-white"
+                      : "text-zinc-600 hover:bg-zinc-100/60 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800/70 dark:hover:text-white"
                   )}
                 >
                   {link.label}
@@ -128,9 +140,22 @@ export function Navbar() {
 
           {/* Desktop Right Action CTAs */}
           <div className="hidden items-center gap-2 sm:flex">
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" || (theme === "system" && resolvedTheme === "dark") ? "light" : "dark")}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700/80 dark:bg-zinc-950 dark:text-zinc-100"
+              aria-label="Toggle dark mode"
+            >
+              {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </button>
+
             <Link
               href="/auth/login"
-              className="rounded-full px-3.5 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950"
+              className="rounded-full px-3.5 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white"
             >
               Log in
             </Link>
@@ -172,7 +197,7 @@ export function Navbar() {
             role="dialog"
             aria-modal="true"
             className={cn(
-              "fixed inset-y-0 right-0 z-[100] flex h-full w-[85%] max-w-sm flex-col bg-white/95 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out sm:hidden border-l border-zinc-100",
+              "fixed inset-y-0 right-0 z-[100] flex h-full w-[85%] max-w-sm flex-col bg-white/95 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out sm:hidden border-l border-zinc-100 dark:bg-zinc-950/95 dark:border-zinc-700/60",
               visible ? "translate-x-0" : "translate-x-full"
             )}
           >
@@ -228,11 +253,18 @@ export function Navbar() {
             </div>
 
             {/* Bottom Actions inside Drawer */}
-            <div className="mt-auto flex flex-col gap-2.5 border-t border-zinc-100 p-6 bg-zinc-50/50">
+            <div className="mt-auto flex flex-col gap-2.5 border-t border-zinc-100 bg-zinc-50/50 p-6 dark:border-zinc-700/60 dark:bg-zinc-950/80">
+              <button
+                type="button"
+                onClick={() => setTheme(theme === "dark" || (theme === "system" && resolvedTheme === "dark") ? "light" : "dark")}
+                className="w-full rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-zinc-800 shadow-2xs transition hover:bg-zinc-50 dark:border-zinc-700/70 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+              >
+                {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? "Switch to Light" : "Switch to Dark"}
+              </button>
               <Link
                 href="/auth/login"
                 onClick={closeDrawer}
-                className="w-full rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-zinc-800 shadow-2xs transition hover:bg-zinc-50"
+                className="w-full rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-zinc-800 shadow-2xs transition hover:bg-zinc-50 dark:border-zinc-700/70 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
                 Log in
               </Link>

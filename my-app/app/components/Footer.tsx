@@ -5,9 +5,9 @@ import { Handshake } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-zinc-200/80 bg-white/50 text-zinc-600">
+    <footer className="mt-auto border-t border-zinc-200/80 bg-white/50 text-zinc-600 dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-300">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 text-sm sm:flex-row">
-        <div className="flex items-center gap-2 font-medium text-zinc-900">
+        <div className="flex items-center gap-2 font-medium text-zinc-900 dark:text-zinc-100">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950 text-white">
             <Handshake className="h-3.5 w-3.5" />
           </div>

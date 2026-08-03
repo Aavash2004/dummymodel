@@ -125,7 +125,7 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50/50 px-6 py-16 text-zinc-900">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-50/50 px-6 py-16 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
@@ -135,7 +135,7 @@ export default function SignupPage() {
           <span className="text-xl font-bold tracking-tight text-zinc-950">Intern App</span>
         </div>
 
-        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl">
+        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl dark:border-zinc-700/60 dark:bg-zinc-950/80">
           <CardHeader className="p-8 pb-4 text-center">
             <CardTitle className="text-2xl font-bold tracking-tight text-zinc-950">Create your account</CardTitle>
             <CardDescription className="text-sm text-zinc-500">Join Northstar with a few simple details.</CardDescription>

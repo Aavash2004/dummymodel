@@ -82,7 +82,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50/50 px-6 py-16 text-zinc-900">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-50/50 px-6 py-16 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
@@ -92,7 +92,7 @@ export default function LoginPage() {
           <span className="text-xl font-bold tracking-tight text-zinc-950">Intern App</span>
         </div>
 
-        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl">
+        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl dark:border-zinc-700/60 dark:bg-zinc-950/80">
           <CardHeader className="p-8 pb-4 text-center">
             <CardTitle className="text-2xl font-bold tracking-tight text-zinc-950">Welcome back</CardTitle>
             <CardDescription className="text-sm text-zinc-500">Sign in to manage your project workspace.</CardDescription>
@@ -101,7 +101,7 @@ export default function LoginPage() {
           <CardContent className="p-8 pt-0">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
                   Email Address
                 </label>
                 <Input
@@ -135,7 +135,7 @@ export default function LoginPage() {
                     }}
                     onBlur={(e) => validateField("password", e.target.value)}
                     placeholder="••••••••"
-                    className="pr-10 rounded-xl border-zinc-200 bg-zinc-50/50"
+                    className="pr-10 rounded-xl border-zinc-200 bg-zinc-50/50 dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-100"
                     disabled={isSubmitting}
                   />
                   <button
@@ -166,7 +166,7 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-xs text-zinc-500">
+            <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
               Don&apos;t have an account?{" "}
               <Link href="/auth/signup" className="font-semibold text-zinc-950 hover:underline">
                 Sign up

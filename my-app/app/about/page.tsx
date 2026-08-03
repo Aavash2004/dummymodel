@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-zinc-50/50 px-6 py-12 sm:py-20 text-zinc-900">
+    <main className="min-h-screen bg-zinc-50/50 px-6 py-12 sm:py-20 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
       <div className="mx-auto max-w-5xl space-y-16">
         {/* Header */}
         <div className="space-y-4">
@@ -41,7 +41,7 @@ export default function AboutPage() {
           </div>
 
           <div className="lg:col-span-5">
-            <div className="overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-2 shadow-2xs">
+            <div className="overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-2 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
               <div className="relative h-72 w-full overflow-hidden rounded-2xl sm:h-80">
                 <Image
                   src="/images/about.jpg"

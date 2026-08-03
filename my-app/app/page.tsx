@@ -11,12 +11,12 @@ const photos = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-zinc-50/50 text-zinc-900 px-6 py-12 sm:py-20">
+    <main className="min-h-screen bg-zinc-50/50 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100 px-6 py-12 sm:py-20">
       <div className="mx-auto max-w-5xl space-y-16">
         {/* Hero Section */}
         <section className="space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-1 text-xs font-semibold text-zinc-700 shadow-2xs">
-            <Handshake className="h-4 w-4 text-zinc-900" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-1 text-xs font-semibold text-zinc-700 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-100">
+            <Handshake className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
             <span>Intern App</span>
           </div>
 
@@ -40,7 +40,7 @@ export default function Home() {
 
             <Link
               href="/about"
-              className="rounded-full border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100"
+              className="rounded-full border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100 dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-100 dark:hover:bg-zinc-800"
             >
               Learn more
             </Link>
@@ -48,17 +48,17 @@ export default function Home() {
         </section>
 
         {/* Full-Width Video Banner Section with "LEARN" in the Middle */}
-        <section className="relative w-full h-72 sm:h-96 md:h-[420px] rounded-3xl overflow-hidden shadow-lg border border-zinc-200/80 my-12 bg-zinc-950">
+        <section className="relative left-1/2 right-1/2 -ml-[50vw]  -mr-[50vw] w-screen h-72 sm:h-96 md:h-[420px] rounded-3xl overflow-hidden shadow-lg border border-zinc-200/80 my-12 dark:border-zinc-700/60">
           {/* Continuously Playing Background Video */}
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="absolute inset-0 h-full w-full object-cover opacity-80"
+            className="absolute inset-0 h-full w-full object-cover opacity-100"
           >
             <source
-              src="/images/video1.mp4"
+              src="/images/mmm.mp4"
               type="video/mp4"
             />
             Your browser does not support the video tag.
@@ -91,8 +91,8 @@ export default function Home() {
               />
             </div>
             <div className="p-4 space-y-1">
-              <h2 className="text-lg font-bold text-zinc-950">Minimal UI Elements</h2>
-              <p className="text-sm text-zinc-600">Clean card structures, clear typography, and balanced spacing.</p>
+              <h2 className="text-lg font-bold text-zinc-950 dark:text-zinc-100">Minimal UI Elements</h2>
+              <p className="text-sm text-zinc-600 dark:text-zinc-300">Clean card structures, clear typography, and balanced spacing.</p>
             </div>
           </div>
 
@@ -114,32 +114,32 @@ export default function Home() {
 
         {/* Key Pillars */}
         <section className="grid gap-6 sm:grid-cols-3">
-          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-950">
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100">
               <Zap className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Fast & Responsive</h3>
-            <p className="text-xs text-zinc-600 leading-relaxed">
+            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Fast & Responsive</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
               Built on React 19 and Next.js App Router for immediate page navigation.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-950">
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100">
               <Code className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Clean Codebase</h3>
-            <p className="text-xs text-zinc-600 leading-relaxed">
+            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Clean Codebase</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
               Structured TypeScript components using standard utility-first CSS.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs">
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-950 text-white">
               <ShieldCheck className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950">Secure Auth</h3>
-            <p className="text-xs text-zinc-600 leading-relaxed">
+            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Secure Auth</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
               PostgreSQL database integration with bcrypt password hashing.
             </p>
           </div>
