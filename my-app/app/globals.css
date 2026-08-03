@@ -52,6 +52,12 @@ body {
   cursor: default;
   overflow-x: hidden;
   position: relative;
+  font-family: var(--font-sans), sans-serif;
+}
+
+code,
+pre {
+  font-family: var(--font-mono), monospace;
 }
 
 body::before {
