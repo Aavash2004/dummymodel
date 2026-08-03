@@ -1,5 +1,5 @@
-import bcrypt from "bcrypt";
 import { Pool } from "pg";
+import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,23 +11,16 @@ type UserRecord = {
   password: string;
 };
 
+type SafeUser = Omit<UserRecord, "password">;
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
 const fallbackUsers: UserRecord[] = [];
-let fallbackIdCounter = 0;
-let dbReadyPromise: Promise<boolean> | null = null;
-
-function getFallbackUsers() {
-  return fallbackUsers;
-}
+let fallbackIdCounter = 1;
 
 export async function query(text: string, params?: unknown[]) {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is not configured");
-  }
-
   const client = await pool.connect();
   try {
     return await client.query(text, params);
@@ -36,7 +29,7 @@ export async function query(text: string, params?: unknown[]) {
   }
 }
 
-export async function initDb() {
+async function initDb(): Promise<boolean> {
   if (!process.env.DATABASE_URL) {
     return false;
   }
@@ -59,70 +52,74 @@ export async function initDb() {
   }
 }
 
-export async function ensureDb() {
+// Cache the DB-readiness check so it only actually runs once per server
+// process, instead of on every single request.
+let dbReadyPromise: Promise<boolean> | null = null;
+
+export function ensureDb(): Promise<boolean> {
   if (!dbReadyPromise) {
     dbReadyPromise = initDb();
   }
   return dbReadyPromise;
 }
 
+function stripPassword(user: UserRecord): SafeUser {
+  const { password: _password, ...safeUser } = user;
+  return safeUser;
+}
+
 export async function createUserRecord(name: string, email: string, password: string) {
   const isDbReady = await ensureDb();
+  const hashedPassword = await bcrypt.hash(password, 12);
 
   if (!isDbReady) {
-    if (getFallbackUsers().some((user) => user.email === email)) {
-      return { success: false, duplicate: true, fallback: true };
+    if (fallbackUsers.some((user) => user.email === email)) {
+      return { success: false, duplicate: true, fallback: true } as const;
     }
 
-    fallbackIdCounter += 1;
-    getFallbackUsers().push({
-      id: fallbackIdCounter,
+    const newUser: UserRecord = {
+      id: fallbackIdCounter++,
       name,
       email,
-      password: await bcrypt.hash(password, 12),
-    });
+      password: hashedPassword,
+    };
+    fallbackUsers.push(newUser);
 
-    return { success: true, fallback: true };
+    return { success: true, fallback: true, user: stripPassword(newUser) } as const;
   }
 
   const existing = await query("SELECT 1 FROM users WHERE email = $1", [email]);
   if (existing.rowCount && existing.rowCount > 0) {
-    return { success: false, duplicate: true, fallback: false };
+    return { success: false, duplicate: true, fallback: false } as const;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const result = await query(
+    "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email",
+    [name, email, hashedPassword]
+  );
 
-  await query("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", [
-    name,
-    email,
-    hashedPassword,
-  ]);
-
-  return { success: true, fallback: false };
+  return { success: true, fallback: false, user: result.rows[0] as SafeUser } as const;
 }
 
 export async function findUserByEmailAndPassword(email: string, password: string) {
   const isDbReady = await ensureDb();
 
   if (!isDbReady) {
-    const user = getFallbackUsers().find((entry) => entry.email === email);
+    const user = fallbackUsers.find((entry) => entry.email === email);
     if (!user) return null;
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return null;
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) return null;
 
-    const { password: _pw, ...safeUser } = user;
-    return { ...safeUser, fallback: true };
+    return { ...stripPassword(user), fallback: true };
   }
 
   const result = await query("SELECT * FROM users WHERE email = $1 LIMIT 1", [email]);
-  const user = result.rows[0];
-
+  const user = result.rows[0] as UserRecord | undefined;
   if (!user) return null;
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return null;
+  const passwordMatches = await bcrypt.compare(password, user.password);
+  if (!passwordMatches) return null;
 
-  const { password: _pw, ...safeUser } = user;
-  return { ...safeUser, fallback: false };
+  return { ...stripPassword(user), fallback: false };
 }

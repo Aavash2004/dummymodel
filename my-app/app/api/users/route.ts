@@ -1,41 +1,71 @@
-import { NextResponse } from "next/server";
-import { createUserRecord, findUserByEmailAndPassword } from "../../../lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import { createUserRecord, findUserByEmailAndPassword } from "@/lib/db";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  let body: {
+    action?: string;
+    name?: string;
+    email?: string;
+    password?: string;
+  };
+
   try {
-    const body = await request.json();
-    const action = body?.action ?? "signup";
-    const { name = "", email = "", password = "" } = body ?? {};
-
-    if (!email || !password) {
-      return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
-    }
-
-    if (action === "login") {
-      const user = await findUserByEmailAndPassword(email, password);
-      if (!user) {
-        return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 200 });
-      }
-
-      return NextResponse.json({ success: true, fallback: user.fallback }, { status: 200 });
-    }
-
-    if (action === "signup") {
-      if (!name) {
-        return NextResponse.json({ error: "Missing name" }, { status: 400 });
-      }
-
-      const result = await createUserRecord(name, email, password);
-      if (!result.success) {
-        return NextResponse.json({ error: "User already exists" }, { status: 409 });
-      }
-
-      return NextResponse.json({ success: true, fallback: result.fallback });
-    }
-
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch (error) {
-    console.error("User API error:", error);
-    return NextResponse.json({ error: "Failed to process request" }, { status: 500 });
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
+
+  const { action, name, email, password } = body;
+
+  if (!action || !email || !password) {
+    return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+  }
+
+  if (action === "signup") {
+    if (!name) {
+      return NextResponse.json({ error: "Name is required." }, { status: 400 });
+    }
+
+    try {
+      const result = await createUserRecord(name, email, password);
+
+      if (!result.success) {
+        return NextResponse.json(
+          { error: "Email already exists" },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json({ success: true, user: result.user }, { status: 201 });
+    } catch (error) {
+      console.error("Signup error:", error);
+      return NextResponse.json(
+        { error: "Something went wrong. Please try again." },
+        { status: 500 }
+      );
+    }
+  }
+
+  if (action === "login") {
+    try {
+      const user = await findUserByEmailAndPassword(email, password);
+
+      if (!user) {
+        return NextResponse.json(
+          { success: false, error: "Invalid credentials" },
+          { status: 401 }
+        );
+      }
+
+      return NextResponse.json({ success: true, user }, { status: 200 });
+    } catch (error) {
+      console.error("Login error:", error);
+      return NextResponse.json(
+        { error: "Something went wrong. Please try again." },
+        { status: 500 }
+      );
+    }
+  }
+
+  return NextResponse.json({ error: "Unknown action." }, { status: 400 });
 }
