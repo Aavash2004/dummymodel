@@ -1,6 +1,8 @@
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
+import fs from "fs/promises";
+import path from "path";
 
 dotenv.config();
 
@@ -17,8 +19,44 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-const fallbackUsers: UserRecord[] = [];
+const fallbackStoragePath = path.join(process.cwd(), ".data", "users.json");
+let fallbackUsers: UserRecord[] = [];
 let fallbackIdCounter = 1;
+let fallbackUsersLoaded = false;
+let fallbackUsersLoadPromise: Promise<void> | null = null;
+
+async function ensureFallbackUsersLoaded() {
+  if (fallbackUsersLoaded) return;
+
+  if (!fallbackUsersLoadPromise) {
+    fallbackUsersLoadPromise = (async () => {
+      try {
+        await fs.mkdir(path.dirname(fallbackStoragePath), { recursive: true });
+        const raw = await fs.readFile(fallbackStoragePath, "utf8");
+        const parsed = JSON.parse(raw) as Partial<UserRecord>[];
+
+        fallbackUsers = parsed.filter((user): user is UserRecord => Boolean(user?.id && user?.email && user?.password));
+        fallbackIdCounter = fallbackUsers.reduce((max, user) => Math.max(max, user.id), 0) + 1;
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (code !== "ENOENT") {
+          console.warn("Unable to load fallback users from disk.", error);
+        }
+        fallbackUsers = [];
+        fallbackIdCounter = 1;
+      } finally {
+        fallbackUsersLoaded = true;
+      }
+    })();
+  }
+
+  await fallbackUsersLoadPromise;
+}
+
+async function saveFallbackUsers() {
+  await fs.mkdir(path.dirname(fallbackStoragePath), { recursive: true });
+  await fs.writeFile(fallbackStoragePath, JSON.stringify(fallbackUsers, null, 2), "utf8");
+}
 
 export async function query(text: string, params?: unknown[]) {
   const client = await pool.connect();
@@ -73,6 +111,8 @@ export async function createUserRecord(name: string, email: string, password: st
   const hashedPassword = await bcrypt.hash(password, 12);
 
   if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+
     if (fallbackUsers.some((user) => user.email === email)) {
       return { success: false, duplicate: true, fallback: true } as const;
     }
@@ -84,6 +124,7 @@ export async function createUserRecord(name: string, email: string, password: st
       password: hashedPassword,
     };
     fallbackUsers.push(newUser);
+    await saveFallbackUsers();
 
     return { success: true, fallback: true, user: stripPassword(newUser) } as const;
   }
@@ -105,6 +146,8 @@ export async function findUserByEmailAndPassword(email: string, password: string
   const isDbReady = await ensureDb();
 
   if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+
     const user = fallbackUsers.find((entry) => entry.email === email);
     if (!user) return null;
 

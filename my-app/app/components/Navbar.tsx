@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { X, Menu, Handshake, Moon, Sun } from "lucide-react";
+import { X, Menu, Handshake, Moon, Sun, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { getToken, clearToken } from "@/app/lib/auth-client";
 
 interface NavLink {
   href: string;
@@ -24,11 +25,16 @@ const TRANSITION_MS = 250;
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
 
   // Theme state
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [themeMounted, setThemeMounted] = useState(false);
+
+  // Auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Mobile drawer states
   const [open, setOpen] = useState(false);
@@ -50,6 +56,14 @@ export function Navbar() {
     closeDrawer();
   }, [pathname]);
 
+  // Check auth state on mount and whenever the route changes
+  // (so login/logout redirects immediately reflect in the navbar)
+  useEffect(() => {
+    const token = getToken();
+    setIsLoggedIn(!!token);
+    setAuthChecked(true);
+  }, [pathname]);
+
   const openDrawer = () => {
     setMounted(true);
     setOpen(true);
@@ -59,6 +73,14 @@ export function Navbar() {
     setVisible(false);
     setOpen(false);
     window.setTimeout(() => setMounted(false), TRANSITION_MS);
+  };
+
+  const handleLogout = () => {
+    clearToken();
+    setIsLoggedIn(false);
+    closeDrawer();
+    router.push("/auth/login");
+    router.refresh();
   };
 
   useEffect(() => {
@@ -100,7 +122,7 @@ export function Navbar() {
               : "border-zinc-200/60 bg-white/75 shadow-sm backdrop-blur-lg"
           )}
         >
-          <BorderBeam duration={7} size={100}  colorFrom="#1005e2" colorTo="#df0e1c " />
+          <BorderBeam duration={7} size={100} colorFrom="#1005e2" colorTo="#df0e1c " />
 
           {/* Brand Logo */}
           <Link
@@ -153,19 +175,32 @@ export function Navbar() {
               )}
             </button>
 
-            <Link
-              href="/auth/login"
-              className="rounded-full px-3.5 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white"
-            >
-              Log in
-            </Link>
+            {!authChecked ? null : isLoggedIn ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Log out
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="rounded-full px-3.5 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white"
+                >
+                  Log in
+                </Link>
 
-            <Link
-              href="/auth/signup"
-              className="rounded-full bg-zinc-950 px-4 py-1.5 text-sm font-medium text-white shadow-xs transition duration-200 hover:bg-zinc-800"
-            >
-              Sign up
-            </Link>
+                <Link
+                  href="/auth/signup"
+                  className="rounded-full bg-zinc-950 px-4 py-1.5 text-sm font-medium text-white shadow-xs transition duration-200 hover:bg-zinc-800"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Toggle Button */}
@@ -261,20 +296,34 @@ export function Navbar() {
               >
                 {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? "Switch to Light" : "Switch to Dark"}
               </button>
-              <Link
-                href="/auth/login"
-                onClick={closeDrawer}
-                className="w-full rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-zinc-800 shadow-2xs transition hover:bg-zinc-50 dark:border-zinc-700/70 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-              >
-                Log in
-              </Link>
-              <Link
-                href="/auth/signup"
-                onClick={closeDrawer}
-                className="w-full rounded-full bg-zinc-950 px-4 py-2.5 text-center text-sm font-medium text-white shadow-xs transition hover:bg-zinc-800"
-              >
-                Sign up
-              </Link>
+
+              {!authChecked ? null : isLoggedIn ? (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-full bg-zinc-950 px-4 py-2.5 text-center text-sm font-medium text-white shadow-xs transition hover:bg-zinc-800"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </button>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={closeDrawer}
+                    className="w-full rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-zinc-800 shadow-2xs transition hover:bg-zinc-50 dark:border-zinc-700/70 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    onClick={closeDrawer}
+                    className="w-full rounded-full bg-zinc-950 px-4 py-2.5 text-center text-sm font-medium text-white shadow-xs transition hover:bg-zinc-800"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </>

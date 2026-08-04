@@ -8,7 +8,8 @@ import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 import { Toast, ToastViewport } from "@/app/components/ui/toast";
-import { EyeIcon, EyeOffIcon, Sparkles, ArrowRight, Handshake } from "lucide-react";
+import { EyeIcon, EyeOffIcon, ArrowRight, Handshake } from "lucide-react";
+import { setToken } from "@/app/lib/auth-client";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -71,6 +72,11 @@ export default function LoginPage() {
         }
         setIsSubmitting(false);
         return;
+      }
+
+      // Save the token to localStorage on success
+      if (data.token) {
+        setToken(data.token);
       }
 
       setToast({ message: "Logged in successfully.", type: "success" });
