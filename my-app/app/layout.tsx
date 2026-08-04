@@ -5,6 +5,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ThemeProvider } from "./components/theme-provider";
 import "./globals.css";
+import { setToken } from "@/lib/auth-client";
 
 const inter = Inter({
   variable: "--font-sans",

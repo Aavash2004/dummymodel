@@ -42,22 +42,24 @@ function Carousel() {
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="relative h-72 w-full overflow-hidden rounded-2xl sm:h-80">
-        {images.map((img, i) => (
+        <div className="absolute inset-0 overflow-hidden">
           <div
-            key={img.src}
-            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: i === index ? 1 : 0 }}
-            aria-hidden={i !== index}
+            className="flex h-full transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${index * 100}%)` }}
           >
-            <Image
-              src={img.src}
-              alt={img.alt}
-              fill
-              className="object-cover"
-              priority={i === 0}
-            />
+            {images.map((img) => (
+              <div key={img.src} className="relative h-full w-full shrink-0">
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  priority={img.src === images[0].src}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
 
         <button
           type="button"

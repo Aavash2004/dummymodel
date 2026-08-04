@@ -118,8 +118,8 @@ export function Navbar() {
           className={cn(
             "relative mx-auto flex max-w-6xl items-center justify-between overflow-hidden rounded-full border transition-all duration-300 px-4 py-2.5 sm:px-6",
             scrolled
-              ? "border-zinc-200/80 bg-white/90 shadow-md backdrop-blur-xl ring-1 ring-black/5"
-              : "border-zinc-200/60 bg-white/75 shadow-sm backdrop-blur-lg"
+              ? "border-zinc-200/80 bg-white/90 text-zinc-900 shadow-md backdrop-blur-xl ring-1 ring-black/5 dark:border-zinc-700/80 dark:bg-zinc-950/90 dark:text-zinc-100 dark:ring-white/10"
+              : "border-zinc-200/60 bg-white/75 text-zinc-900 shadow-sm backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-950/75 dark:text-zinc-100"
           )}
         >
           <BorderBeam duration={7} size={100} colorFrom="#1005e2" colorTo="#df0e1c " />
@@ -127,12 +127,12 @@ export function Navbar() {
           {/* Brand Logo */}
           <Link
             href="/"
-            className="group flex items-center gap-2 text-sm font-semibold tracking-tight text-zinc-950 transition hover:opacity-90"
+            className="group flex items-center gap-2 text-sm font-semibold tracking-tight text-zinc-950 transition hover:opacity-90 dark:text-zinc-100"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
               <Handshake className="h-4 w-4" />
             </div>
-            <span className="font-bold tracking-tight text-zinc-950">Intern App</span>
+            <span className="font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Intern App</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -165,7 +165,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setTheme(theme === "dark" || (theme === "system" && resolvedTheme === "dark") ? "light" : "dark")}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700/80 dark:bg-zinc-950 dark:text-zinc-100"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700/80 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               aria-label="Toggle dark mode"
             >
               {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? (
@@ -207,7 +207,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={openDrawer}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100 sm:hidden active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800 sm:hidden active:scale-95"
             aria-label="Open menu"
             aria-expanded={open}
           >
@@ -241,17 +241,17 @@ export function Navbar() {
               <Link
                 href="/"
                 onClick={closeDrawer}
-                className="flex items-center gap-2 text-sm font-semibold text-zinc-950"
+                className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-white">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
                   <Handshake className="h-4 w-4" />
                 </div>
-                <span className="font-bold tracking-tight text-zinc-950">Intern App</span>
+                <span className="font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Intern App</span>
               </Link>
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
                 aria-label="Close menu"
               >
                 <X className="h-5 w-5" />
@@ -274,13 +274,13 @@ export function Navbar() {
                     className={cn(
                       "flex items-center justify-between rounded-xl px-3 py-3 text-lg font-medium transition-colors",
                       isActive
-                        ? "bg-zinc-100 font-semibold text-zinc-950"
-                        : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
+                        ? "bg-zinc-100 font-semibold text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100"
+                        : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
                     )}
                   >
                     <span>{link.label}</span>
                     {isActive && (
-                      <span className="h-2 w-2 rounded-full bg-zinc-900" />
+                      <span className="h-2 w-2 rounded-full bg-zinc-900 dark:bg-zinc-100" />
                     )}
                   </Link>
                 );
