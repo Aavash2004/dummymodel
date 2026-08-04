@@ -138,11 +138,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-2 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
-              <div className="relative h-48 w-full overflow-hidden rounded-2xl">
-                <Image src="/images/con.jpg" alt="Contact" fill className="object-cover" />
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>

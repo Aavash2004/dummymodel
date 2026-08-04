@@ -54,14 +54,6 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 shadow-2xs transition hover:bg-zinc-100 dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-100 dark:hover:bg-zinc-800"
-          >
-            <LogOut className="h-4 w-4" />
-            Log out
-          </button>
         </div>
 
         {/* Profile Card */}
