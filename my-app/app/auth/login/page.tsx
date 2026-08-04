@@ -64,8 +64,8 @@ export default function LoginPage() {
       if (!response.ok || data.success === false) {
         if (data.error === "Invalid credentials") {
           setErrors({
-            email: "Invalid email or password.",
-            password: "Invalid email or password.",
+            email: "Invalid email ",
+            password: "Invalid  password.",
           });
         } else {
           setToast({ message: data.error || "Login failed.", type: "error" });
