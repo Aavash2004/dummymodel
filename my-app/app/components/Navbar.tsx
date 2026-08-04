@@ -106,6 +106,12 @@ export function Navbar() {
     };
   }, [open]);
 
+  const shouldHideNavbar = pathname === "/auth/login" || pathname === "/auth/signup";
+
+  if (shouldHideNavbar) {
+    return null;
+  }
+
   return (
     <>
       <nav

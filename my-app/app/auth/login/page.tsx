@@ -80,7 +80,7 @@ export default function LoginPage() {
       }
 
       setToast({ message: "Logged in successfully.", type: "success" });
-      router.push("/");
+      router.push("/auth");
     } catch {
       setToast({ message: "Unable to reach the server right now.", type: "error" });
       setIsSubmitting(false);
