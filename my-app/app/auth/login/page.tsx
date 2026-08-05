@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app
 import { Input } from "@/app/components/ui/input";
 import { Toast, ToastViewport } from "@/app/components/ui/toast";
 import { EyeIcon, EyeOffIcon, ArrowRight, Handshake } from "lucide-react";
-import { setToken } from "@/app/lib/auth-client";
+import { setToken, setUser } from "@/app/lib/auth-client";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -78,9 +78,13 @@ export default function LoginPage() {
       if (data.token) {
         setToken(data.token);
       }
-
+   if (data.user) {
+  console.log("Calling setUser with:", data.user);
+  setUser(data.user);
+  console.log("After setUser, check:", localStorage.getItem("auth_user"));
+}
       setToast({ message: "Logged in successfully.", type: "success" });
-      router.push("/auth");
+      router.push("/dashboard");
     } catch {
       setToast({ message: "Unable to reach the server right now.", type: "error" });
       setIsSubmitting(false);

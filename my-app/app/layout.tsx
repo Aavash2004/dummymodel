@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import CursorEffect from "./cursor";
-import { Navbar } from "./components/Navbar";
-import { Footer } from "./components/Footer";
 import { ThemeProvider } from "./components/theme-provider";
 import "./globals.css";
 
@@ -35,12 +33,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-zinc-900 selection:text-white">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <CursorEffect />
-          <Navbar />
-          <div className="flex-1">{children}</div>
-          <Footer />
+          <div className="flex-1 flex flex-col">{children}</div>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-

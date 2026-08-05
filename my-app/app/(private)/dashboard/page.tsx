@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, clearToken } from "@/app/lib/auth-client";
+import { getToken, getUser, clearToken, clearUser } from "@/app/lib/auth-client";
 import { LogOut, User, Mail, ShieldCheck, Clock } from "lucide-react";
 
 export default function AuthPage() {
   const router = useRouter();
   const [checked, setChecked] = useState(false);
+  const [user, setLocalUser] = useState<{ id: number; name: string; email: string } | null>(null);
 
   useEffect(() => {
     const token = getToken();
@@ -15,11 +16,13 @@ export default function AuthPage() {
       router.replace("/auth/login");
       return;
     }
+    setLocalUser(getUser());
     setChecked(true);
   }, [router]);
 
   const handleLogout = () => {
     clearToken();
+    clearUser();
     router.push("/");
   };
 
@@ -47,13 +50,12 @@ export default function AuthPage() {
               Account
             </p>
             <h1 className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-5xl">
-              Welcome back.
+              Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}.
             </h1>
             <p className="max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
               You&apos;re signed in and ready to go. Manage your account or head back to the site.
             </p>
           </div>
-
         </div>
 
         {/* Profile Card */}
@@ -63,9 +65,11 @@ export default function AuthPage() {
               <User className="h-7 w-7" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-zinc-950 dark:text-white">You&apos;re logged in</h2>
+              <h2 className="text-xl font-bold text-zinc-950 dark:text-white">
+                {user?.name || "You're logged in"}
+              </h2>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                This page is only visible to authenticated users.
+                {user?.email || "This page is only visible to authenticated users."}
               </p>
             </div>
           </div>
