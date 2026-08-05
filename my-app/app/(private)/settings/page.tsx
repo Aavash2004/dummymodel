@@ -5,6 +5,17 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { getUser, setUser, getToken, clearToken, clearUser } from "@/app/lib/auth-client";
 import { User, Lock, Trash2, Save, Eye, EyeOff } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const profileSchema = z.object({
   name: z
@@ -40,7 +51,6 @@ export default function SettingsPage() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
@@ -157,41 +167,33 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
+const handleDeleteAccount = async () => {
+  setDeleting(true);
+
+  try {
+    const response = await fetch("/api/users", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.success === false) {
+      showMessage(data.error || "Failed to delete account.", "error");
+      setDeleting(false);
       return;
     }
 
-    setDeleting(true);
-
-    try {
-      const response = await fetch("/api/users", {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || data.success === false) {
-        showMessage(data.error || "Failed to delete account.", "error");
-        setDeleting(false);
-        setConfirmDelete(false);
-        return;
-      }
-
-      clearToken();
-      clearUser();
-      router.push("/");
-    } catch {
-      showMessage("Unable to reach the server right now.", "error");
-      setDeleting(false);
-      setConfirmDelete(false);
-    }
-  };
-
+    clearToken();
+    clearUser();
+    router.push("/");
+  } catch {
+    showMessage("Unable to reach the server right now.", "error");
+    setDeleting(false);
+  }
+};
   return (
     <div className="mx-auto max-w-3xl space-y-10 px-6 py-10 sm:py-14">
       <div className="space-y-2">
@@ -343,28 +345,54 @@ export default function SettingsPage() {
       </div>
 
       {/* Danger zone */}
-      <div className="rounded-3xl border border-red-200 bg-red-50/50 p-8 shadow-2xs dark:border-red-900/60 dark:bg-red-950/10">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-600 text-white">
+      <div className="rounded-3xl border border-red-200/80 bg-red-50/50 p-8 shadow-2xs dark:border-red-800/60 dark:bg-red-950/40">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700 text-white dark:bg-red-400 dark:text-red-950">
             <Trash2 className="h-4 w-4" />
           </div>
-          <h2 className="text-lg font-bold text-red-700 dark:text-red-400">Danger Zone</h2>
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-400">Account Deletion</h2>
         </div>
-        <p className="mb-4 text-sm text-red-700/80 dark:text-red-400/80">
-          Deleting your account is permanent and cannot be undone. All your data will be removed.
-        </p>
-        <button
-          type="button"
-          onClick={handleDeleteAccount}
-          disabled={deleting}
-          className="rounded-full border border-red-300 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60 dark:border-red-800 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/40"
-        >
-          {deleting
-            ? "Deleting..."
-            : confirmDelete
-            ? "Click again to confirm delete"
-            : "Delete account"}
-        </button>
+       <AlertDialog>
+  <AlertDialogTrigger   >
+    <button
+      type="button"
+      disabled={deleting}
+      className="rounded-full border border-red-300 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60 dark:border-red-800 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/40"
+    >
+      <span className="flex items-center gap-2">
+        <Trash2 className="h-4 w-4" />
+        Delete account
+      </span>
+    </button>
+  </AlertDialogTrigger>
+
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>
+        Delete your account?
+      </AlertDialogTitle>
+
+      <AlertDialogDescription>
+        This action cannot be undone. Your account and all associated
+        data will be permanently deleted.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+
+    <AlertDialogFooter>
+      <AlertDialogCancel disabled={deleting}>
+        Cancel
+      </AlertDialogCancel>
+
+      <AlertDialogAction
+        onClick={handleDeleteAccount}
+        disabled={deleting}
+        className="bg-red-600 text-white hover:bg-red-700"
+      >
+        {deleting ? "Deleting..." : "Yes, delete account"}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
       </div>
     </div>
   );

@@ -230,27 +230,53 @@ export async function deleteUserAccount(userId: number) {
   return { success: true } as const;
 }
 
-export async function findUserByEmailAndPassword(email: string, password: string) {
+export async function findUserByEmailAndPassword(
+  email: string,
+  password: string
+) {
+  const normalizedEmail = email.trim().toLowerCase();
   const isDbReady = await ensureDb();
 
   if (!isDbReady) {
     await ensureFallbackUsersLoaded();
 
-    const user = fallbackUsers.find((entry) => entry.email === email);
+    const user = fallbackUsers.find(
+      (entry) => entry.email === normalizedEmail
+    );
+
     if (!user) return null;
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user.password
+    );
+
     if (!passwordMatches) return null;
 
-    return { ...stripPassword(user), fallback: true };
+    return {
+      ...stripPassword(user),
+      fallback: true,
+    };
   }
 
-  const result = await query("SELECT * FROM users WHERE email = $1 LIMIT 1", [email]);
+  const result = await query(
+    "SELECT * FROM users WHERE email = $1 LIMIT 1",
+    [normalizedEmail]
+  );
+
   const user = result.rows[0] as UserRecord | undefined;
+
   if (!user) return null;
 
-  const passwordMatches = await bcrypt.compare(password, user.password);
+  const passwordMatches = await bcrypt.compare(
+    password,
+    user.password
+  );
+
   if (!passwordMatches) return null;
 
-  return { ...stripPassword(user), fallback: false };
+  return {
+    ...stripPassword(user),
+    fallback: false,
+  };
 }
