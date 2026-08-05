@@ -142,6 +142,94 @@ export async function createUserRecord(name: string, email: string, password: st
   return { success: true, fallback: false, user: result.rows[0] as SafeUser } as const;
 }
 
+export async function updateUserProfile(userId: number, name: string, email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const isDbReady = await ensureDb();
+
+  if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+    const user = fallbackUsers.find((u) => u.id === userId);
+    if (!user) return { success: false, error: "User not found" } as const;
+
+    const emailTaken = fallbackUsers.some((u) => u.email === normalizedEmail && u.id !== userId);
+    if (emailTaken) return { success: false, error: "Email already in use" } as const;
+
+    user.name = name;
+    user.email = normalizedEmail;
+    await saveFallbackUsers();
+
+    return { success: true, user: stripPassword(user) } as const;
+  }
+
+  const emailTaken = await query("SELECT 1 FROM users WHERE email = $1 AND id != $2", [normalizedEmail, userId]);
+  if (emailTaken.rowCount && emailTaken.rowCount > 0) {
+    return { success: false, error: "Email already in use" } as const;
+  }
+
+  const result = await query(
+    "UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING id, name, email, created_at",
+    [name, normalizedEmail, userId]
+  );
+
+  if (result.rowCount === 0) {
+    return { success: false, error: "User not found" } as const;
+  }
+
+  return { success: true, user: result.rows[0] as SafeUser } as const;
+}
+
+export async function updateUserPassword(userId: number, currentPassword: string, newPassword: string) {
+  const isDbReady = await ensureDb();
+
+  if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+    const user = fallbackUsers.find((u) => u.id === userId);
+    if (!user) return { success: false, error: "User not found" } as const;
+
+    const matches = await bcrypt.compare(currentPassword, user.password);
+    if (!matches) return { success: false, error: "Current password is incorrect" } as const;
+
+    user.password = await bcrypt.hash(newPassword, 12);
+    await saveFallbackUsers();
+
+    return { success: true } as const;
+  }
+
+  const result = await query("SELECT * FROM users WHERE id = $1", [userId]);
+  const user = result.rows[0] as UserRecord | undefined;
+  if (!user) return { success: false, error: "User not found" } as const;
+
+  const matches = await bcrypt.compare(currentPassword, user.password);
+  if (!matches) return { success: false, error: "Current password is incorrect" } as const;
+
+  const hashedNew = await bcrypt.hash(newPassword, 12);
+  await query("UPDATE users SET password = $1 WHERE id = $2", [hashedNew, userId]);
+
+  return { success: true } as const;
+}
+
+export async function deleteUserAccount(userId: number) {
+  const isDbReady = await ensureDb();
+
+  if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+    const index = fallbackUsers.findIndex((u) => u.id === userId);
+    if (index === -1) return { success: false, error: "User not found" } as const;
+
+    fallbackUsers.splice(index, 1);
+    await saveFallbackUsers();
+
+    return { success: true } as const;
+  }
+
+  const result = await query("DELETE FROM users WHERE id = $1", [userId]);
+  if (result.rowCount === 0) {
+    return { success: false, error: "User not found" } as const;
+  }
+
+  return { success: true } as const;
+}
+
 export async function findUserByEmailAndPassword(email: string, password: string) {
   const isDbReady = await ensureDb();
 

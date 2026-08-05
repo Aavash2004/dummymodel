@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getToken, getUser, clearToken, clearUser } from "@/app/lib/auth-client";
-import { LayoutDashboard, User, Settings, LogOut, Handshake } from "lucide-react";
+import { LayoutDashboard, User, Settings, LogOut, Handshake, Moon, Sun } from "lucide-react";
 
 const privateLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -15,10 +16,13 @@ const privateLinks = [
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [themeMounted, setThemeMounted] = useState(false);
   const [checked, setChecked] = useState(false);
   const [user, setLocalUser] = useState<{ id: number; name: string; email: string } | null>(null);
 
   useEffect(() => {
+    setThemeMounted(true);
     const token = getToken();
     if (!token) {
       router.replace("/auth/login");
@@ -41,6 +45,8 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
       </div>
     );
   }
+
+  const isDark = theme === "dark" || (theme === "system" && resolvedTheme === "dark");
 
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -90,6 +96,14 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
           </div>
           <button
             type="button"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="mb-3 flex w-full items-center gap-3 rounded-xl border border-zinc-200 px-3 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {themeMounted ? (isDark ? "Light mode" : "Dark mode") : "Toggle theme"}
+          </button>
+          <button
+            type="button"
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
           >
@@ -108,14 +122,24 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
             </div>
             <span className="text-sm font-bold text-zinc-950 dark:text-white">Intern App</span>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-full p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900"
-            aria-label="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className="rounded-full p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900"
+              aria-label="Toggle dark mode"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900"
+              aria-label="Log out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </header>
 
         <main className="flex-1">{children}</main>
