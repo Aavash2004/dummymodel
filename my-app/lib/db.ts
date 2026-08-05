@@ -69,6 +69,9 @@ export async function query(text: string, params?: unknown[]) {
 
 async function initDb(): Promise<boolean> {
   if (!process.env.DATABASE_URL) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("DATABASE_URL is not set in production environment");
+    }
     return false;
   }
 
@@ -86,6 +89,12 @@ async function initDb(): Promise<boolean> {
     return true;
   } catch (error) {
     console.warn("Postgres unavailable, using fallback storage.", error);
+    if (process.env.NODE_ENV === "production") {
+      // In production we do not want a silent fallback to file storage.
+      throw new Error(
+        `Postgres unavailable in production environment: ${(error as Error).message}`
+      );
+    }
     return false;
   }
 }
@@ -111,6 +120,10 @@ export async function createUserRecord(name: string, email: string, password: st
   const hashedPassword = await bcrypt.hash(password, 12);
 
   if (!isDbReady) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Database not available in production; fallback storage disabled.");
+    }
+
     await ensureFallbackUsersLoaded();
 
     if (fallbackUsers.some((user) => user.email === email)) {
@@ -147,6 +160,10 @@ export async function updateUserProfile(userId: number, name: string, email: str
   const isDbReady = await ensureDb();
 
   if (!isDbReady) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Database not available in production; fallback storage disabled.");
+    }
+
     await ensureFallbackUsersLoaded();
     const user = fallbackUsers.find((u) => u.id === userId);
     if (!user) return { success: false, error: "User not found" } as const;
@@ -182,6 +199,10 @@ export async function updateUserPassword(userId: number, currentPassword: string
   const isDbReady = await ensureDb();
 
   if (!isDbReady) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Database not available in production; fallback storage disabled.");
+    }
+
     await ensureFallbackUsersLoaded();
     const user = fallbackUsers.find((u) => u.id === userId);
     if (!user) return { success: false, error: "User not found" } as const;
@@ -212,6 +233,10 @@ export async function deleteUserAccount(userId: number) {
   const isDbReady = await ensureDb();
 
   if (!isDbReady) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Database not available in production; fallback storage disabled.");
+    }
+
     await ensureFallbackUsersLoaded();
     const index = fallbackUsers.findIndex((u) => u.id === userId);
     if (index === -1) return { success: false, error: "User not found" } as const;
