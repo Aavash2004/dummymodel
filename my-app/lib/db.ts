@@ -155,31 +155,7 @@ export async function createUserRecord(name: string, email: string, password: st
   return { success: true, fallback: false, user: result.rows[0] as SafeUser } as const;
 }
 
-export async function updateUserProfile(userId: number, name: string) {
-  const isDbReady = await ensureDb();
 
-  if (!isDbReady) {
-    await ensureFallbackUsersLoaded();
-    const user = fallbackUsers.find((u) => u.id === userId);
-    if (!user) return { success: false, error: "User not found" } as const;
-
-    user.name = name;
-    await saveFallbackUsers();
-
-    return { success: true, user: stripPassword(user) } as const;
-  }
-
-  const result = await query(
-    "UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, created_at",
-    [name, userId]
-  );
-
-  if (result.rowCount === 0) {
-    return { success: false, error: "User not found" } as const;
-  }
-
-  return { success: true, user: result.rows[0] as SafeUser } as const;
-}
 
 export async function updateUserPassword(userId: number, currentPassword: string, newPassword: string) {
   const isDbReady = await ensureDb();
@@ -290,18 +266,4 @@ export async function findUserByEmailAndPassword(
     ...stripPassword(user),
     fallback: false,
   };
-}
-export async function findUserById(userId: number) {
-  const isDbReady = await ensureDb();
-
-  if (!isDbReady) {
-    await ensureFallbackUsersLoaded();
-    const user = fallbackUsers.find((u) => u.id === userId);
-    if (!user) return null;
-    return stripPassword(user);
-  }
-
-  const result = await query("SELECT id, name, email, created_at FROM users WHERE id = $1", [userId]);
-  const user = result.rows[0] as SafeUser | undefined;
-  return user || null;
 }

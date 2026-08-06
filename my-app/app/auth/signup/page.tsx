@@ -8,69 +8,28 @@ import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 import { Toast, ToastViewport } from "@/app/components/ui/toast";
-import { EyeIcon, EyeOffIcon, Sparkles, ArrowRight, Handshake } from "lucide-react";
+import { EyeIcon, EyeOffIcon, ArrowRight, Handshake } from "lucide-react";
+import { setToken, setUser } from "@/app/lib/auth-client";
 
-const signupSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, "Name must be at least 2 characters.")
-      .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces."),
-    email: z.string().email("Please enter a valid email address."),
-    password: z.string().min(6, "Password must be at least 6 characters."),
-    confirmPassword: z.string().min(6, "Please confirm your password."),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  });
-
-type FormState = {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-};
-
-type FormErrors = {
-  name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-};
+const signupSchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(100, "Name is too long."),
+  email: z.string().email("Please enter a valid email address."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+});
 
 export default function SignupPage() {
   const router = useRouter();
-  const [form, setForm] = useState<FormState>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateField = (field: keyof FormState, value: string) => {
-    const nextForm = { ...form, [field]: value };
-    const result = signupSchema.safeParse(nextForm);
-
-    if (result.success) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-        ...(field === "password" ? { confirmPassword: undefined } : {}),
-      }));
-      return;
-    }
-
-    const fieldErrors = result.error.flatten().fieldErrors;
+  const validateField = (field: "name" | "email" | "password", value: string) => {
+    const result = signupSchema.shape[field].safeParse(value);
     setErrors((prev) => ({
       ...prev,
-      [field]: fieldErrors[field]?.[0],
-      ...(field === "password" ? { confirmPassword: fieldErrors.confirmPassword?.[0] } : {}),
+      [field]: result.success ? undefined : result.error.issues[0].message,
     }));
   };
 
@@ -84,7 +43,6 @@ export default function SignupPage() {
         name: fieldErrors.name?.[0],
         email: fieldErrors.email?.[0],
         password: fieldErrors.password?.[0],
-        confirmPassword: fieldErrors.confirmPassword?.[0],
       });
       return;
     }
@@ -106,18 +64,25 @@ export default function SignupPage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        if (data.error === "Email already exists" || data.error === "User already exists") {
+      if (!response.ok || data.success === false) {
+        if (data.error === "Email already exists") {
           setErrors({ email: "An account with this email already exists." });
         } else {
-          setToast({ message: data.error || "Failed to save user.", type: "error" });
+          setToast({ message: data.error || "Signup failed.", type: "error" });
         }
         setIsSubmitting(false);
         return;
       }
 
+      if (data.token) {
+        setToken(data.token);
+      }
+      if (data.user) {
+        setUser(data.user);
+      }
+
       setToast({ message: "Account created successfully.", type: "success" });
-      router.push("/auth/login");
+      router.push("/dashboard");
     } catch {
       setToast({ message: "Unable to reach the server right now.", type: "error" });
       setIsSubmitting(false);
@@ -125,31 +90,35 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-50/50 px-6 py-16 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-50 px-6 py-16 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-pink-300/40 blur-3xl" />
-        <div className="absolute right-[-4rem] top-20 h-72 w-72 rounded-full bg-cyan-300/35 blur-3xl" />
-        <div className="absolute bottom-[-3rem] left-1/3 h-60 w-60 rounded-full bg-violet-300/35 blur-3xl" />
+        <div className="absolute left-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-pink-300/40 blur-3xl dark:bg-pink-500/10" />
+        <div className="absolute right-[-4rem] top-20 h-72 w-72 rounded-full bg-cyan-300/35 blur-3xl dark:bg-cyan-500/10" />
+        <div className="absolute bottom-[-3rem] left-1/3 h-60 w-60 rounded-full bg-violet-300/35 blur-3xl dark:bg-violet-500/10" />
       </div>
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
             <Handshake className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-zinc-950">Intern App</span>
+          <span className="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">Intern App</span>
         </div>
 
-        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl dark:border-zinc-700/60 dark:bg-zinc-950/80">
+        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl dark:border-zinc-800 dark:bg-zinc-900">
           <CardHeader className="p-8 pb-4 text-center">
-            <CardTitle className="text-2xl font-bold tracking-tight text-zinc-950">Create your account</CardTitle>
-            <CardDescription className="text-sm text-zinc-500">Join Northstar with a few simple details.</CardDescription>
+            <CardTitle className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">
+              Create an account
+            </CardTitle>
+            <CardDescription className="text-sm text-zinc-500 dark:text-zinc-400">
+              Get started with your project workspace.
+            </CardDescription>
           </CardHeader>
 
           <CardContent className="p-8 pt-0">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                   Full Name
                 </label>
                 <Input
@@ -160,15 +129,15 @@ export default function SignupPage() {
                     if (errors.name) validateField("name", e.target.value);
                   }}
                   onBlur={(e) => validateField("name", e.target.value)}
-                  placeholder="Jane Doe"
+                  placeholder="Your name"
                   disabled={isSubmitting}
-                  className="rounded-xl border-zinc-200 bg-zinc-50/50"
+                  className="rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
                 />
-                {errors.name ? <p className="mt-1 text-xs text-red-600">{errors.name}</p> : null}
+                {errors.name ? <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.name}</p> : null}
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                   Email Address
                 </label>
                 <Input
@@ -181,13 +150,13 @@ export default function SignupPage() {
                   onBlur={(e) => validateField("email", e.target.value)}
                   placeholder="you@example.com"
                   disabled={isSubmitting}
-                  className="rounded-xl border-zinc-200 bg-zinc-50/50"
+                  className="rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
                 />
-                {errors.email ? <p className="mt-1 text-xs text-red-600">{errors.email}</p> : null}
+                {errors.email ? <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.email}</p> : null}
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                   Password
                 </label>
                 <div className="relative">
@@ -196,73 +165,44 @@ export default function SignupPage() {
                     value={form.password}
                     onChange={(e) => {
                       setForm({ ...form, password: e.target.value });
-                      if (errors.password || errors.confirmPassword) validateField("password", e.target.value);
+                      if (errors.password) validateField("password", e.target.value);
                     }}
                     onBlur={(e) => validateField("password", e.target.value)}
                     placeholder="••••••••"
-                    className="pr-10 rounded-xl border-zinc-200 bg-zinc-50/50"
+                    className="pr-10 rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
                     disabled={isSubmitting}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200 cursor-pointer"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
                   </button>
                 </div>
-                {errors.password ? <p className="mt-1 text-xs text-red-600">{errors.password}</p> : null}
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <Input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={form.confirmPassword}
-                    onChange={(e) => {
-                      setForm({ ...form, confirmPassword: e.target.value });
-                      if (errors.confirmPassword) validateField("confirmPassword", e.target.value);
-                    }}
-                    onBlur={(e) => validateField("confirmPassword", e.target.value)}
-                    placeholder="••••••••"
-                    className="pr-10 rounded-xl border-zinc-200 bg-zinc-50/50"
-                    disabled={isSubmitting}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 cursor-pointer"
-                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                  >
-                    {showConfirmPassword ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
-                  </button>
-                </div>
-                {errors.confirmPassword ? <p className="mt-1 text-xs text-red-600">{errors.confirmPassword}</p> : null}
+                {errors.password ? <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.password}</p> : null}
               </div>
 
               <Button
                 type="submit"
-                className="w-full rounded-full bg-zinc-950 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 cursor-pointer mt-2"
+                className="w-full rounded-full bg-zinc-950 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 cursor-pointer mt-2 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   "Creating account..."
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    <span>Create Account</span>
-                    <ArrowRight className="h-4 w-4 text-zinc-400" />
+                    <span>Sign up</span>
+                    <ArrowRight className="h-4 w-4 text-zinc-400 dark:text-zinc-600" />
                   </span>
                 )}
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-xs text-zinc-500">
+            <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
               Already have an account?{" "}
-              <Link href="/auth/login" className="font-semibold text-zinc-950 hover:underline">
+              <Link href="/auth/login" className="font-semibold text-zinc-950 hover:underline dark:text-white">
                 Log in
               </Link>
             </p>

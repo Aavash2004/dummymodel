@@ -64,8 +64,8 @@ export default function LoginPage() {
       if (!response.ok || data.success === false) {
         if (data.error === "Invalid credentials") {
           setErrors({
-            email: "Invalid email ",
-            password: "Invalid   password.",
+            email: "Invalid email or password.",
+            password: "Invalid email or password.",
           });
         } else {
           setToast({ message: data.error || "Login failed.", type: "error" });
@@ -74,15 +74,13 @@ export default function LoginPage() {
         return;
       }
 
-      // Save the token to localStorage on success
       if (data.token) {
         setToken(data.token);
       }
-   if (data.user) {
-  console.log("Calling setUser with:", data.user);
-  setUser(data.user);
-  console.log("After setUser, check:", localStorage.getItem("auth_user"));
-}
+      if (data.user) {
+        setUser(data.user);
+      }
+
       setToast({ message: "Logged in successfully.", type: "success" });
       router.push("/dashboard");
     } catch {
@@ -92,31 +90,35 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-50/50 px-6 py-16 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-50 px-6 py-16 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-pink-300/40 blur-3xl" />
-        <div className="absolute right-[-4rem] top-20 h-72 w-72 rounded-full bg-cyan-300/35 blur-3xl" />
-        <div className="absolute bottom-[-3rem] left-1/3 h-60 w-60 rounded-full bg-violet-300/35 blur-3xl" />
+        <div className="absolute left-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-pink-300/40 blur-3xl dark:bg-pink-500/10" />
+        <div className="absolute right-[-4rem] top-20 h-72 w-72 rounded-full bg-cyan-300/35 blur-3xl dark:bg-cyan-500/10" />
+        <div className="absolute bottom-[-3rem] left-1/3 h-60 w-60 rounded-full bg-violet-300/35 blur-3xl dark:bg-violet-500/10" />
       </div>
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
             <Handshake className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-zinc-950">Intern App</span>
+          <span className="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">Intern App</span>
         </div>
 
-        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl dark:border-zinc-700/60 dark:bg-zinc-950/80">
+        <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl dark:border-zinc-800 dark:bg-zinc-900">
           <CardHeader className="p-8 pb-4 text-center">
-            <CardTitle className="text-2xl font-bold tracking-tight text-zinc-950">Welcome back</CardTitle>
-            <CardDescription className="text-sm text-zinc-500">Sign in to manage your project workspace.</CardDescription>
+            <CardTitle className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">
+              Welcome back
+            </CardTitle>
+            <CardDescription className="text-sm text-zinc-500 dark:text-zinc-400">
+              Sign in to manage your project workspace.
+            </CardDescription>
           </CardHeader>
 
           <CardContent className="p-8 pt-0">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                   Email Address
                 </label>
                 <Input
@@ -129,14 +131,14 @@ export default function LoginPage() {
                   onBlur={(e) => validateField("email", e.target.value)}
                   placeholder="you@example.com"
                   disabled={isSubmitting}
-                  className="rounded-xl border-zinc-200 bg-zinc-50/50"
+                  className="rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
                 />
-                {errors.email ? <p className="mt-1 text-xs text-red-600">{errors.email}</p> : null}
+                {errors.email ? <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.email}</p> : null}
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                     Password
                   </label>
                 </div>
@@ -150,24 +152,24 @@ export default function LoginPage() {
                     }}
                     onBlur={(e) => validateField("password", e.target.value)}
                     placeholder="••••••••"
-                    className="pr-10 rounded-xl border-zinc-200 bg-zinc-50/50 dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-100"
+                    className="pr-10 rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
                     disabled={isSubmitting}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200 cursor-pointer"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
                   </button>
                 </div>
-                {errors.password ? <p className="mt-1 text-xs text-red-600">{errors.password}</p> : null}
+                {errors.password ? <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.password}</p> : null}
               </div>
 
               <Button
                 type="submit"
-                className="w-full rounded-full bg-zinc-950 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 cursor-pointer mt-2"
+                className="w-full rounded-full bg-zinc-950 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 cursor-pointer mt-2 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -175,7 +177,7 @@ export default function LoginPage() {
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     <span>Log in</span>
-                    <ArrowRight className="h-4 w-4 text-zinc-400" />
+                    <ArrowRight className="h-4 w-4 text-zinc-400 dark:text-zinc-600" />
                   </span>
                 )}
               </Button>
@@ -183,7 +185,7 @@ export default function LoginPage() {
 
             <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
               Don&apos;t have an account?{" "}
-              <Link href="/auth/signup" className="font-semibold text-zinc-950 hover:underline">
+              <Link href="/auth/signup" className="font-semibold text-zinc-950 hover:underline dark:text-white">
                 Sign up
               </Link>
             </p>

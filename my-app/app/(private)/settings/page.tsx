@@ -17,7 +17,8 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
   const [currentPasswordError, setCurrentPasswordError] = useState<string | undefined>();
   const [newPasswordError, setNewPasswordError] = useState<string | undefined>();
 
@@ -113,7 +114,7 @@ const [showNewPassword, setShowNewPassword] = useState(false);
         </p>
       </div>
 
-       {/* Password section */}
+      {/* Password section */}
       <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
@@ -198,7 +199,7 @@ const [showNewPassword, setShowNewPassword] = useState(false);
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-600 text-white">
             <Trash2 className="h-4 w-4" />
           </div>
-          <h2 className="text-lg font-bold text-red-700 dark:text-red-400">Account Deletion</h2>
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-400">Account Delection</h2>
         </div>
         <p className="mb-4 text-sm text-red-700/80 dark:text-red-400/80">
           Deleting your account is permanent and cannot be undone. All your data will be removed.
@@ -215,14 +216,12 @@ const [showNewPassword, setShowNewPassword] = useState(false);
       {/* Delete confirmation modal */}
       {showDeleteDialog ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => !deleting && setShowDeleteDialog(false)}
             aria-hidden="true"
           />
 
-          {/* Dialog */}
           <div
             role="alertdialog"
             aria-modal="true"

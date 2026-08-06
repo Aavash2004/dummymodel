@@ -59,7 +59,7 @@ export default function AuthPage() {
         </div>
 
         {/* Profile Card */}
-        <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80 sm:p-10">
+       <div className="rounded-3xl border border-white/50 bg-white/60 p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/40">
           <div className="flex flex-wrap items-center gap-5">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
               <User className="h-7 w-7" />
