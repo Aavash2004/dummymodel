@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { getUser, setUser, getToken, clearToken, clearUser } from "@/app/lib/auth-client";
+import { getToken, clearToken, clearUser } from "@/app/lib/auth-client";
 import { Toast, ToastViewport } from "@/app/components/ui/toast";
-import { User, Lock, Trash2, Save } from "lucide-react";
-
-const profileSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(100, "Name is too long."),
-});
+import { Lock, Trash2, AlertTriangle, X, EyeIcon, EyeOffIcon } from "lucide-react";
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required."),
@@ -18,69 +14,18 @@ const passwordSchema = z.object({
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-
-  const [nameError, setNameError] = useState<string | undefined>();
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
   const [currentPasswordError, setCurrentPasswordError] = useState<string | undefined>();
   const [newPasswordError, setNewPasswordError] = useState<string | undefined>();
 
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
-  useEffect(() => {
-    const u = getUser();
-    if (u) {
-      setName(u.name);
-      setEmail(u.email);
-    }
-  }, []);
-
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = profileSchema.safeParse({ name });
-
-    if (!result.success) {
-      setNameError(result.error.issues[0].message);
-      return;
-    }
-    setNameError(undefined);
-    setSavingProfile(true);
-
-    try {
-      const response = await fetch("/api/me", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ name: result.data.name }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || data.success === false) {
-        setToast({ message: data.error || "Failed to update profile.", type: "error" });
-        return;
-      }
-
-      if (data.user) {
-        setUser(data.user);
-      }
-
-      setToast({ message: "Profile updated.", type: "success" });
-    } catch {
-      setToast({ message: "Unable to reach the server right now.", type: "error" });
-    } finally {
-      setSavingProfile(false);
-    }
-  };
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,11 +72,6 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
-
     setDeleting(true);
 
     try {
@@ -145,7 +85,7 @@ export default function SettingsPage() {
       if (!response.ok || data.success === false) {
         setToast({ message: data.error || "Failed to delete account.", type: "error" });
         setDeleting(false);
-        setConfirmDelete(false);
+        setShowDeleteDialog(false);
         return;
       }
 
@@ -155,7 +95,7 @@ export default function SettingsPage() {
     } catch {
       setToast({ message: "Unable to reach the server right now.", type: "error" });
       setDeleting(false);
-      setConfirmDelete(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -169,56 +109,11 @@ export default function SettingsPage() {
           Account settings.
         </h1>
         <p className="text-lg text-zinc-600 dark:text-zinc-400">
-          Manage your profile, password, and account preferences.
+          Manage your password and account preferences.
         </p>
       </div>
 
-      <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-            <User className="h-4 w-4" />
-          </div>
-          <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Profile</h2>
-        </div>
-
-        <form onSubmit={handleSaveProfile} className="space-y-4">
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (nameError) setNameError(undefined);
-              }}
-              disabled={savingProfile}
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
-            />
-            {nameError ? <p className="mt-1 text-xs text-red-600">{nameError}</p> : null}
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
-              Email Address
-            </label>
-            <p className="rounded-xl border border-zinc-200 bg-zinc-100/50 px-3 py-2.5 text-sm text-zinc-500 dark:border-zinc-700/60 dark:bg-zinc-900/40 dark:text-zinc-500">
-              {email}
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            disabled={savingProfile}
-            className="flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
-          >
-            <Save className="h-4 w-4" />
-            {savingProfile ? "Saving..." : "Save changes"}
-          </button>
-        </form>
-      </div>
-
+       {/* Password section */}
       <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
@@ -232,17 +127,27 @@ export default function SettingsPage() {
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
               Current Password
             </label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => {
-                setCurrentPassword(e.target.value);
-                if (currentPasswordError) setCurrentPasswordError(undefined);
-              }}
-              placeholder="••••••••"
-              disabled={savingPassword}
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
-            />
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value);
+                  if (currentPasswordError) setCurrentPasswordError(undefined);
+                }}
+                placeholder="••••••••"
+                disabled={savingPassword}
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 pr-10 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 dark:hover:text-zinc-200"
+                aria-label={showCurrentPassword ? "Hide password" : "Show password"}
+              >
+                {showCurrentPassword ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
+              </button>
+            </div>
             {currentPasswordError ? (
               <p className="mt-1 text-xs text-red-600">{currentPasswordError}</p>
             ) : null}
@@ -252,17 +157,27 @@ export default function SettingsPage() {
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
               New Password
             </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                if (newPasswordError) setNewPasswordError(undefined);
-              }}
-              placeholder="••••••••"
-              disabled={savingPassword}
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
-            />
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  if (newPasswordError) setNewPasswordError(undefined);
+                }}
+                placeholder="••••••••"
+                disabled={savingPassword}
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 pr-10 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 dark:hover:text-zinc-200"
+                aria-label={showNewPassword ? "Hide password" : "Show password"}
+              >
+                {showNewPassword ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
+              </button>
+            </div>
             {newPasswordError ? <p className="mt-1 text-xs text-red-600">{newPasswordError}</p> : null}
           </div>
 
@@ -277,6 +192,7 @@ export default function SettingsPage() {
         </form>
       </div>
 
+      {/* Danger zone */}
       <div className="rounded-3xl border border-red-200 bg-red-50/50 p-8 shadow-2xs dark:border-red-900/60 dark:bg-red-950/10">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-600 text-white">
@@ -289,17 +205,73 @@ export default function SettingsPage() {
         </p>
         <button
           type="button"
-          onClick={handleDeleteAccount}
-          disabled={deleting}
-          className="rounded-full border border-red-300 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60 dark:border-red-800 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/40"
+          onClick={() => setShowDeleteDialog(true)}
+          className="rounded-full border border-red-300 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-800 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/40"
         >
-          {deleting
-            ? "Deleting..."
-            : confirmDelete
-            ? "Click again to confirm delete"
-            : "Delete account"}
+          Delete account
         </button>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteDialog ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => !deleting && setShowDeleteDialog(false)}
+            aria-hidden="true"
+          />
+
+          {/* Dialog */}
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            className="relative w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:p-8"
+          >
+            <button
+              type="button"
+              onClick={() => !deleting && setShowDeleteDialog(false)}
+              disabled={deleting}
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+
+            <h3 id="delete-dialog-title" className="text-lg font-bold text-zinc-950 dark:text-white">
+              Delete your account?
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              This action is permanent. All your data, including your profile and session history, will be
+              deleted immediately and cannot be recovered.
+            </p>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={deleting}
+                className="rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700/60 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                className="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+              >
+                {deleting ? "Deleting..." : "Yes, delete my account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {toast ? (
         <ToastViewport>
