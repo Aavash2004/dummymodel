@@ -1,6 +1,16 @@
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
+export interface StoredUser {
+  id: number;
+  name: string;
+  email: string;
+  username?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  created_at?: string;
+}
+
 export function setToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
 }
@@ -14,11 +24,11 @@ export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-export function setUser(user: { id: number; name: string; email: string }): void {
+export function setUser(user: StoredUser): void {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
-export function getUser(): { id: number; name: string; email: string } | null {
+export function getUser(): StoredUser | null {
   if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) return null;

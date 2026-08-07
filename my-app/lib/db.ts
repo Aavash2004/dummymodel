@@ -11,6 +11,10 @@ type UserRecord = {
   name: string;
   email: string;
   password: string;
+  username?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  created_at?: string;
 };
 
 type SafeUser = Omit<UserRecord, "password">;
@@ -266,4 +270,80 @@ export async function findUserByEmailAndPassword(
     ...stripPassword(user),
     fallback: false,
   };
+}
+export async function findUserById(userId: number) {
+  const isDbReady = await ensureDb();
+
+  if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+    const user = fallbackUsers.find((u) => u.id === userId);
+    if (!user) return null;
+    return stripPassword(user);
+  }
+
+  const result = await query(
+    "SELECT id, name, email, username, phone, address, created_at FROM users WHERE id = $1",
+    [userId]
+  );
+  const user = result.rows[0] as SafeUser | undefined;
+  return user || null;
+}
+
+export async function updateUserProfile(userId: number, name: string) {
+  const isDbReady = await ensureDb();
+
+  if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+    const user = fallbackUsers.find((u) => u.id === userId);
+    if (!user) return { success: false, error: "User not found" } as const;
+
+    user.name = name;
+    await saveFallbackUsers();
+
+    return { success: true, user: stripPassword(user) } as const;
+  }
+
+  const result = await query(
+    "UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, created_at",
+    [name, userId]
+  );
+
+  if (result.rowCount === 0) {
+    return { success: false, error: "User not found" } as const;
+  }
+
+  return { success: true, user: result.rows[0] as SafeUser } as const;
+}
+
+export async function updateUserContactInfo(
+  userId: number,
+  username: string,
+  phone: string,
+  address: string
+) {
+  const isDbReady = await ensureDb();
+
+  if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+    const user = fallbackUsers.find((u) => u.id === userId);
+    if (!user) return { success: false, error: "User not found" } as const;
+
+    user.username = username;
+    user.phone = phone;
+    user.address = address;
+    await saveFallbackUsers();
+
+    return { success: true, user: stripPassword(user) } as const;
+  }
+
+  const result = await query(
+    "UPDATE users SET username = $1, phone = $2, address = $3 WHERE id = $4 RETURNING id, name, email, username, phone, address, created_at",
+    [username, phone, address, userId]
+  );
+
+  if (result.rowCount === 0) {
+    return { success: false, error: "User not found" } as const;
+  }
+
+  return { success: true, user: result.rows[0] as SafeUser } as const;
 }

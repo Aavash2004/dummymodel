@@ -1,32 +1,127 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { getToken, clearToken, clearUser } from "@/app/lib/auth-client";
+import { getToken, getUser, setUser, clearToken, clearUser, type StoredUser } from "@/app/lib/auth-client";
 import { Toast, ToastViewport } from "@/app/components/ui/toast";
-import { Lock, Trash2, AlertTriangle, X, EyeIcon, EyeOffIcon } from "lucide-react";
+import {
+  Lock,
+  Trash2,
+  AlertTriangle,
+  X,
+  EyeIcon,
+  EyeOffIcon,
+  Pencil,
+  AtSign,
+  Phone,
+  MapPin,
+} from "lucide-react";
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required."),
   newPassword: z.string().min(6, "New password must be at least 6 characters."),
 });
 
+const contactSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters.")
+    .max(30, "Username is too long.")
+    .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores allowed."),
+  phone: z.string().trim().max(20, "Phone number is too long.").optional().or(z.literal("")),
+  address: z.string().trim().max(255, "Address is too long.").optional().or(z.literal("")),
+});
+
 export default function SettingsPage() {
   const router = useRouter();
+
+  // Profile / contact info state
+  const [storedUser, setStoredUser] = useState<StoredUser | null>(null);
+  const [editingContact, setEditingContact] = useState(false);
+  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [usernameError, setUsernameError] = useState<string | undefined>();
+  const [phoneError, setPhoneError] = useState<string | undefined>();
+  const [addressError, setAddressError] = useState<string | undefined>();
+  const [savingContact, setSavingContact] = useState(false);
+
+  // Password state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-
   const [currentPasswordError, setCurrentPasswordError] = useState<string | undefined>();
   const [newPasswordError, setNewPasswordError] = useState<string | undefined>();
-
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
   const [savingPassword, setSavingPassword] = useState(false);
+
+  // Shared / delete state
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  useEffect(() => {
+    const u = getUser();
+    setStoredUser(u);
+    if (u) {
+      setUsername(u.username || "");
+      setPhone(u.phone || "");
+      setAddress(u.address || "");
+    }
+  }, []);
+
+  const handleSaveContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = contactSchema.safeParse({ username, phone, address });
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setUsernameError(fieldErrors.username?.[0]);
+      setPhoneError(fieldErrors.phone?.[0]);
+      setAddressError(fieldErrors.address?.[0]);
+      return;
+    }
+    setUsernameError(undefined);
+    setPhoneError(undefined);
+    setAddressError(undefined);
+    setSavingContact(true);
+
+    try {
+      const response = await fetch("/api/me/contact", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({
+          username: result.data.username,
+          phone: result.data.phone || "",
+          address: result.data.address || "",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.success === false) {
+        setToast({ message: data.error || "Failed to update details.", type: "error" });
+        return;
+      }
+
+      if (data.user) {
+        setUser(data.user);
+        setStoredUser(data.user);
+      }
+
+      setToast({ message: "Details updated.", type: "success" });
+      setEditingContact(false);
+    } catch {
+      setToast({ message: "Unable to reach the server right now.", type: "error" });
+    } finally {
+      setSavingContact(false);
+    }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,8 +205,129 @@ export default function SettingsPage() {
           Account settings.
         </h1>
         <p className="text-lg text-zinc-600 dark:text-zinc-400">
-          Manage your password and account preferences.
+          Manage your profile, password, and account preferences.
         </p>
+      </div>
+
+      {/* Profile section */}
+      <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
+              <AtSign className="h-4 w-4" />
+            </div>
+            <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Profile</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setEditingContact(!editingContact)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+            aria-label={editingContact ? "Cancel editing" : "Edit profile"}
+          >
+            {editingContact ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+          </button>
+        </div>
+
+        {/* Read-only name/email — never editable */}
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
+              Full Name
+            </label>
+            <p className="rounded-xl border border-zinc-200 bg-zinc-100/50 px-3 py-2.5 text-sm text-zinc-500 dark:border-zinc-700/60 dark:bg-zinc-900/40 dark:text-zinc-500">
+              {storedUser?.name || "—"}
+            </p>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
+              Email
+            </label>
+            <p className="rounded-xl border border-zinc-200 bg-zinc-100/50 px-3 py-2.5 text-sm text-zinc-500 dark:border-zinc-700/60 dark:bg-zinc-900/40 dark:text-zinc-500">
+              {storedUser?.email || "—"}
+            </p>
+          </div>
+        </div>
+
+        {editingContact ? (
+          <form onSubmit={handleSaveContact} className="space-y-4 border-t border-zinc-100 pt-6 dark:border-zinc-800">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (usernameError) setUsernameError(undefined);
+                }}
+                placeholder="e.g. aavash_dev"
+                disabled={savingContact}
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
+              />
+              {usernameError ? <p className="mt-1 text-xs text-red-600">{usernameError}</p> : null}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  if (phoneError) setPhoneError(undefined);
+                }}
+                placeholder="+1 555 123 4567"
+                disabled={savingContact}
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
+              />
+              {phoneError ? <p className="mt-1 text-xs text-red-600">{phoneError}</p> : null}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
+                Address
+              </label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                  if (addressError) setAddressError(undefined);
+                }}
+                placeholder="Street, City, Country"
+                disabled={savingContact}
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
+              />
+              {addressError ? <p className="mt-1 text-xs text-red-600">{addressError}</p> : null}
+            </div>
+
+            <button
+              type="submit"
+              disabled={savingContact}
+              className="flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+            >
+              {savingContact ? "Saving..." : "Save changes"}
+            </button>
+          </form>
+        ) : (
+          <div className="grid gap-4 border-t border-zinc-100 pt-6 dark:border-zinc-800 sm:grid-cols-3">
+            <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <AtSign className="h-4 w-4 flex-shrink-0 text-zinc-400" />
+              <span className="truncate">{username || "No username set"}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <Phone className="h-4 w-4 flex-shrink-0 text-zinc-400" />
+              <span className="truncate">{phone || "No phone set"}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <MapPin className="h-4 w-4 flex-shrink-0 text-zinc-400" />
+              <span className="truncate">{address || "No address set"}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Password section */}
@@ -199,7 +415,7 @@ export default function SettingsPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-600 text-white">
             <Trash2 className="h-4 w-4" />
           </div>
-          <h2 className="text-lg font-bold text-red-700 dark:text-red-400">Account Delection</h2>
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-400">Account Deletion</h2>
         </div>
         <p className="mb-4 text-sm text-red-700/80 dark:text-red-400/80">
           Deleting your account is permanent and cannot be undone. All your data will be removed.
