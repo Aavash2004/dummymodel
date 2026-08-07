@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getUser } from "@/app/lib/auth-client";
 import { ShieldCheck, Clock, Hash, Pencil } from "lucide-react";
+import { CldImage } from "next-cloudinary";
 
 interface StoredUser {
   id: number;
