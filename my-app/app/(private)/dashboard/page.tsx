@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, getUser, clearToken, clearUser } from "@/app/lib/auth-client";
 import { LogOut, User, Mail, ShieldCheck, Clock } from "lucide-react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 
 export default function AuthPage() {
   const router = useRouter();
@@ -61,9 +66,16 @@ export default function AuthPage() {
         {/* Profile Card */}
        <div className="rounded-3xl border border-white/50 bg-white/60 p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/40">
           <div className="flex flex-wrap items-center gap-5">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-              <User className="h-7 w-7" />
-            </div>
+              <Avatar className="h-20 w-20 border border-zinc-200">
+  <AvatarImage
+    src="https://github.com/shadcn.png"
+    alt={user?.name ?? "User Avatar"}
+  />
+  <AvatarFallback>
+    
+  </AvatarFallback>
+</Avatar>
+            
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-zinc-950 dark:text-white">
                 {user?.name || "You're logged in"}

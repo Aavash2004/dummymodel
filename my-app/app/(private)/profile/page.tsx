@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getUser } from "@/app/lib/auth-client";
 import { ShieldCheck, Clock, Hash, Pencil } from "lucide-react";
-import { CldImage } from "next-cloudinary";
+
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
+
+
 
 interface StoredUser {
   id: number;
@@ -63,9 +70,15 @@ export default function ProfilePage() {
       <div className="rounded-3xl border border-white/50 bg-white/60 p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/40">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-950 text-lg font-bold text-white dark:bg-white dark:text-zinc-950">
-              {getInitials(user?.name || "")}
-            </div>
+            <Avatar className="h-20 w-20 border border-zinc-200">
+  <AvatarImage
+    src="https://github.com/shadcn.png"
+    alt={user?.name ?? "User Avatar"}
+  />
+  <AvatarFallback>
+    {getInitials(user?.name ?? "")} 
+  </AvatarFallback>
+</Avatar>
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-zinc-950 dark:text-white">
                 {user?.name || "—"}

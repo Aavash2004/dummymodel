@@ -19,24 +19,10 @@ import {
 } from "lucide-react";
 import {
   Avatar,
+  AvatarBadge,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
-
-export function AvatarDemo() {
-  return (
-    <Avatar>
-      <AvatarImage
-        src="https://github.com/shadcn.png"
-        alt="@shadcn"
-        className="grayscale"
-      />
-      <AvatarFallback>CN</AvatarFallback>
-    </Avatar>
-  )
-}
-
-
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required."),
@@ -253,10 +239,20 @@ export default function SettingsPage() {
       <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Avatar className="h-20 w-20">
-            <AvatarFallback className="bg-zinc-900 text-xl text-white dark:bg-white dark:text-zinc-900">
-          </AvatarFallback>
-           </Avatar>
+          <Avatar className="h-20 w-20 border border-zinc-200">
+  <AvatarImage
+    src="https://github.com/shadcn.png"
+    alt={storedUser?.name ?? "Profile"}
+  />
+  <AvatarFallback>
+    {storedUser?.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "CN"}
+  </AvatarFallback>
+</Avatar>
             <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Profile</h2>
           </div>
           <button
