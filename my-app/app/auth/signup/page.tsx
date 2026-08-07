@@ -11,53 +11,82 @@ import { Toast, ToastViewport } from "@/app/components/ui/toast";
 import { EyeIcon, EyeOffIcon, ArrowRight, Handshake } from "lucide-react";
 import { setToken, setUser } from "@/app/lib/auth-client";
 
-const signupSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(100, "Name is too long."),
-  email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
-});
+const signupSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, "Name is required.")
+      .max(100, "Name is too long.")
+      .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces."),
+    email: z.string().trim().email("Please enter a valid email address."),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters.")
+      .max(72, "Password is too long."),
+    confirmPassword: z.string().min(1, "Please confirm your password."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 export default function SignupPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateField = (field: "name" | "email" | "password", value: string) => {
-    const result = signupSchema.shape[field].safeParse(value);
-    setErrors((prev) => ({
-      ...prev,
-      [field]: result.success ? undefined : result.error.issues[0].message,
-    }));
+  const validateAll = (values: typeof form) => {
+    const result = signupSchema.safeParse(values);
+    if (result.success) {
+      setErrors({});
+      return true;
+    }
+    const fieldErrors = result.error.flatten().fieldErrors;
+    setErrors({
+      name: fieldErrors.name?.[0],
+      email: fieldErrors.email?.[0],
+      password: fieldErrors.password?.[0],
+      confirmPassword: fieldErrors.confirmPassword?.[0],
+    });
+    return false;
+  };
+
+  const handleFieldChange = (field: keyof typeof form, value: string) => {
+    const updated = { ...form, [field]: value };
+    setForm(updated);
+    // Re-validate live once the user has already tried submitting once
+    if (Object.keys(errors).length > 0) {
+      validateAll(updated);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = signupSchema.safeParse(form);
 
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors({
-        name: fieldErrors.name?.[0],
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
-      });
+    if (!validateAll(form)) {
       return;
     }
 
-    setErrors({});
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/users", {
+      const response = await fetch("/api/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "signup",
-          name: form.name,
-          email: form.email,
+          name: form.name.trim(),
+          email: form.email.trim(),
           password: form.password,
         }),
       });
@@ -66,7 +95,7 @@ export default function SignupPage() {
 
       if (!response.ok || data.success === false) {
         if (data.error === "Email already exists") {
-          setErrors({ email: "An account with this email already exists." });
+          setErrors((prev) => ({ ...prev, email: "An account with this email already exists." }));
         } else {
           setToast({ message: data.error || "Signup failed.", type: "error" });
         }
@@ -74,15 +103,8 @@ export default function SignupPage() {
         return;
       }
 
-      if (data.token) {
-        setToken(data.token);
-      }
-      if (data.user) {
-        setUser(data.user);
-      }
-
-      setToast({ message: "Account created successfully.", type: "success" });
-      router.push("/dashboard");
+     setToast({ message: "Account created successfully. Please log in.", type: "success" });
+router.push("/auth/login");
     } catch {
       setToast({ message: "Unable to reach the server right now.", type: "error" });
       setIsSubmitting(false);
@@ -124,11 +146,7 @@ export default function SignupPage() {
                 <Input
                   type="text"
                   value={form.name}
-                  onChange={(e) => {
-                    setForm({ ...form, name: e.target.value });
-                    if (errors.name) validateField("name", e.target.value);
-                  }}
-                  onBlur={(e) => validateField("name", e.target.value)}
+                  onChange={(e) => handleFieldChange("name", e.target.value)}
                   placeholder="Your name"
                   disabled={isSubmitting}
                   className="rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
@@ -143,11 +161,7 @@ export default function SignupPage() {
                 <Input
                   type="email"
                   value={form.email}
-                  onChange={(e) => {
-                    setForm({ ...form, email: e.target.value });
-                    if (errors.email) validateField("email", e.target.value);
-                  }}
-                  onBlur={(e) => validateField("email", e.target.value)}
+                  onChange={(e) => handleFieldChange("email", e.target.value)}
                   placeholder="you@example.com"
                   disabled={isSubmitting}
                   className="rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
@@ -163,11 +177,7 @@ export default function SignupPage() {
                   <Input
                     type={showPassword ? "text" : "password"}
                     value={form.password}
-                    onChange={(e) => {
-                      setForm({ ...form, password: e.target.value });
-                      if (errors.password) validateField("password", e.target.value);
-                    }}
-                    onBlur={(e) => validateField("password", e.target.value)}
+                    onChange={(e) => handleFieldChange("password", e.target.value)}
                     placeholder="••••••••"
                     className="pr-10 rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
                     disabled={isSubmitting}
@@ -182,6 +192,33 @@ export default function SignupPage() {
                   </button>
                 </div>
                 {errors.password ? <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.password}</p> : null}
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={form.confirmPassword}
+                    onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
+                    placeholder="••••••••"
+                    className="pr-10 rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
+                    disabled={isSubmitting}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200 cursor-pointer"
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword ? (
+                  <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.confirmPassword}</p>
+                ) : null}
               </div>
 
               <Button

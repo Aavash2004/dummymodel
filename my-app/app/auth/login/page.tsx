@@ -49,7 +49,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/users", {
+      const response = await fetch("/api/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

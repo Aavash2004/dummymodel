@@ -68,9 +68,9 @@ useEffect(() => {
   return (
    <div className="relative flex min-h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">  {/* Background wash — private workspace palette */}
 <div className="pointer-events-none absolute inset-0 -z-10">
-  <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-teal-400/30 blur-3xl dark:bg-teal-500/15" />
-  <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-indigo-400/30 blur-3xl dark:bg-indigo-500/15" />
-  <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-400/25 blur-3xl dark:bg-emerald-500/10" />
+  <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-rose-400/30 blur-3xl dark:bg-rose-500/15" />
+  <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-amber-400/25 blur-3xl dark:bg-amber-500/15" />
+  <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-blue-400/25 blur-3xl dark:bg-blue-500/10" />
 </div>
 
       

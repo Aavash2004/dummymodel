@@ -30,8 +30,17 @@ const contactSchema = z.object({
     .min(3, "Username must be at least 3 characters.")
     .max(30, "Username is too long.")
     .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores allowed."),
-  phone: z.string().trim().max(20, "Phone number is too long.").optional().or(z.literal("")),
-  address: z.string().trim().max(255, "Address is too long.").optional().or(z.literal("")),
+  phone: z
+    .string()
+    .trim()
+    .length(10, "Phone number must be exactly 10 digits.")
+    .regex(/^[0-9]+$/, "Phone number must contain numbers only."),
+  address: z
+    .string()
+    .trim()
+    .min(1, "Address is required.")
+    .max(255, "Address is too long.")
+    .regex(/^[a-zA-Z\s,.'-]+$/, "Address can only contain letters and basic punctuation."),
 });
 
 export default function SettingsPage() {
@@ -61,7 +70,18 @@ export default function SettingsPage() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const validateContactField = (field: "username" | "phone" | "address", value: string) => {
+  const fieldSchema = contactSchema.shape[field];
+  const result = fieldSchema.safeParse(value);
 
+  if (field === "username") {
+    setUsernameError(result.success ? undefined : result.error.issues[0].message);
+  } else if (field === "phone") {
+    setPhoneError(result.success ? undefined : result.error.issues[0].message);
+  } else if (field === "address") {
+    setAddressError(result.success ? undefined : result.error.issues[0].message);
+  }
+};
   useEffect(() => {
     const u = getUser();
     setStoredUser(u);
@@ -229,7 +249,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Read-only name/email — never editable */}
-        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+     <div className="mb-6 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
               Full Name
@@ -259,8 +279,9 @@ export default function SettingsPage() {
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
-                  if (usernameError) setUsernameError(undefined);
+                  validateContactField("username", e.target.value);
                 }}
+                onBlur={(e) => validateContactField("username", e.target.value)}
                 placeholder="e.g. aavash_dev"
                 disabled={savingContact}
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
@@ -277,8 +298,9 @@ export default function SettingsPage() {
                 value={phone}
                 onChange={(e) => {
                   setPhone(e.target.value);
-                  if (phoneError) setPhoneError(undefined);
+                  validateContactField("phone", e.target.value);
                 }}
+                onBlur={(e) => validateContactField("phone", e.target.value)}
                 placeholder="+1 555 123 4567"
                 disabled={savingContact}
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
@@ -295,8 +317,9 @@ export default function SettingsPage() {
                 value={address}
                 onChange={(e) => {
                   setAddress(e.target.value);
-                  if (addressError) setAddressError(undefined);
+                  validateContactField("address", e.target.value);
                 }}
+                onBlur={(e) => validateContactField("address", e.target.value)}
                 placeholder="Street, City, Country"
                 disabled={savingContact}
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
