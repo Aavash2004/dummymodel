@@ -18,6 +18,23 @@ import {
   MapPin,
 } from "lucide-react";
 
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
+
+export function AvatarWithBadge() {
+  return (
+    <Avatar>
+      <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+      <AvatarFallback>CN</AvatarFallback>
+      <AvatarBadge className="bg-green-600 dark:bg-green-800" />
+    </Avatar>
+  )
+}
+
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required."),
   newPassword: z.string().min(6, "New password must be at least 6 characters."),
@@ -30,11 +47,13 @@ const contactSchema = z.object({
     .min(3, "Username must be at least 3 characters.")
     .max(30, "Username is too long.")
     .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores allowed."),
-  phone: z
-    .string()
-    .trim()
-    .length(10, "Phone number must be exactly 10 digits.")
-    .regex(/^[0-9]+$/, "Phone number must contain numbers only."),
+ phone: z
+  .string()
+  .trim()
+  .regex(
+    /^(97|98|96)\d{8}$/,
+    "Enter a valid phone number (must start with 97 or 98, 10 digits)"
+  ),
   address: z
     .string()
     .trim()
@@ -233,9 +252,17 @@ export default function SettingsPage() {
       <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-              <AtSign className="h-4 w-4" />
-            </div>
+             <Avatar className="h-20 w-20 border-2 border-zinc-200 dark:border-zinc-700">
+               <AvatarImage
+        src="https://github.com/shadcn.png"
+        alt="@shadcn"
+        className="grayscale"
+      />
+  <AvatarFallback className="bg-zinc-900 text-xl font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
+   
+  </AvatarFallback>
+   <AvatarBadge className="bg-green-600 dark:bg-green-800" />
+</Avatar>
             <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Profile</h2>
           </div>
           <button
@@ -297,8 +324,9 @@ export default function SettingsPage() {
                 type="tel"
                 value={phone}
                 onChange={(e) => {
-                  setPhone(e.target.value);
-                  validateContactField("phone", e.target.value);
+                  const value = e.target.value.replace(/[^0-9]/g, ""); // Allow only digits
+                  setPhone(value);
+                  validateContactField("phone", value);
                 }}
                 onBlur={(e) => validateContactField("phone", e.target.value)}
                 placeholder="+1 555 123 4567"

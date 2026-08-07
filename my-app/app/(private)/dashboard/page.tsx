@@ -4,7 +4,22 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, getUser, clearToken, clearUser } from "@/app/lib/auth-client";
 import { LogOut, User, Mail, ShieldCheck, Clock } from "lucide-react";
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 
+export function AvatarWithBadge() {
+  return (
+    <Avatar>
+      <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+      <AvatarFallback>CN</AvatarFallback>
+      <AvatarBadge className="bg-green-600 dark:bg-green-800" />
+    </Avatar>
+  )
+}
 export default function AuthPage() {
   const router = useRouter();
   const [checked, setChecked] = useState(false);
@@ -61,9 +76,18 @@ export default function AuthPage() {
         {/* Profile Card */}
        <div className="rounded-3xl border border-white/50 bg-white/60 p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/40">
           <div className="flex flex-wrap items-center gap-5">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-              <User className="h-7 w-7" />
-            </div>
+             <Avatar className="h-20 w-20 border-2 border-zinc-200 dark:border-zinc-700">
+               <AvatarImage
+        src="https://github.com/shadcn.png"
+        alt="@shadcn"
+        className="grayscale"
+      />
+  <AvatarFallback className="bg-zinc-900 text-xl font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
+   
+  </AvatarFallback>
+   <AvatarBadge className="bg-green-600 dark:bg-green-800" />
+</Avatar>
+            
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-zinc-950 dark:text-white">
                 {user?.name || "You're logged in"}
