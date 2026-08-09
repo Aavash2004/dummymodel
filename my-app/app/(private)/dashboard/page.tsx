@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, getUser, clearToken, clearUser } from "@/app/lib/auth-client";
+import { getToken, getUser, clearToken, clearUser, type StoredUser } from "@/app/lib/auth-client";
 import { LogOut, User, Mail, ShieldCheck, Clock } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar"
+} from "@/components/ui/avatar";
 
 export default function AuthPage() {
   const router = useRouter();
   const [checked, setChecked] = useState(false);
-  const [user, setLocalUser] = useState<{ id: number; name: string; email: string } | null>(null);
+  const [user, setLocalUser] = useState<StoredUser | null>(null);
 
   useEffect(() => {
     const token = getToken();
@@ -38,6 +38,14 @@ export default function AuthPage() {
       </main>
     );
   }
+
+  const initials =
+    user?.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-50/50 px-6 py-12 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100 sm:py-20">
@@ -64,18 +72,15 @@ export default function AuthPage() {
         </div>
 
         {/* Profile Card */}
-       <div className="rounded-3xl border border-white/50 bg-white/60 p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/40">
+        <div className="rounded-3xl border border-white/50 bg-white/60 p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/40">
           <div className="flex flex-wrap items-center gap-5">
-              <Avatar className="h-20 w-20 border border-zinc-200">
-  <AvatarImage
-    src="https://github.com/shadcn.png"
-    alt={user?.name ?? "User Avatar"}
-  />
-  <AvatarFallback>
-    
-  </AvatarFallback>
-</Avatar>
-            
+            <Avatar className="h-20 w-20 border border-zinc-200 dark:border-zinc-700">
+              {user?.avatar_url ? (
+                <AvatarImage src={user.avatar_url} alt={user?.name ?? "User Avatar"} />
+              ) : null}
+              <AvatarFallback className="text-lg font-bold">{initials}</AvatarFallback>
+            </Avatar>
+
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-zinc-950 dark:text-white">
                 {user?.name || "You're logged in"}

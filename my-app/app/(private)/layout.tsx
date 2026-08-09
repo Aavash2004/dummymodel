@@ -1,12 +1,16 @@
 "use client";
-
+import { getToken, getUser, clearToken, clearUser, type StoredUser } from "@/app/lib/auth-client";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { getToken, getUser, clearToken, clearUser } from "@/app/lib/auth-client";
 import { LayoutDashboard, User, Settings, LogOut, Handshake, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Sun , Moon } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 
 const privateLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -14,18 +18,29 @@ const privateLinks = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
+function getInitials(name?: string | null) {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [checked, setChecked] = useState(false);
-  const [user, setLocalUser] = useState<{ id: number; name: string; email: string } | null>(null);
+  const [user, setLocalUser] = useState<StoredUser | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { theme, setTheme, resolvedTheme } = useTheme();  
-const [themeMounted, setThemeMounted] = useState(false);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [themeMounted, setThemeMounted] = useState(false);
 
-useEffect(() => {
-  setThemeMounted(true);
-}, []);
+  useEffect(() => {
+    setThemeMounted(true);
+  }, []);
 
   useEffect(() => {
     const token = getToken();
@@ -66,16 +81,16 @@ useEffect(() => {
   }
 
   return (
-   <div className="relative flex min-h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">  {/* Background wash — private workspace palette */}
-<div className="pointer-events-none absolute inset-0 -z-10">
-  <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-rose-400/30 blur-3xl dark:bg-rose-500/15" />
-  <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-amber-400/25 blur-3xl dark:bg-amber-500/15" />
-  <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-blue-400/25 blur-3xl dark:bg-blue-500/10" />
-</div>
+    <div className="relative flex min-h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      {/* Background wash — private workspace palette */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-rose-400/30 blur-3xl dark:bg-rose-500/15" />
+        <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-amber-400/25 blur-3xl dark:bg-amber-500/15" />
+        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-blue-400/25 blur-3xl dark:bg-blue-500/10" />
+      </div>
 
-      
       {/* Sidebar (desktop) */}
-      <aside className="hidden w-64 flex-col border-r border-white/40 bg-white/60  backdrop-blur-xl  dark:border-white/10 dark:bg-zinc-950/50 sm:flex">
+      <aside className="hidden w-64 flex-col border-r border-white/40 bg-white/60 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/50 sm:flex">
         <div className="flex items-center gap-2 border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
             <Handshake className="h-4 w-4" />
@@ -106,9 +121,14 @@ useEffect(() => {
 
         <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
           <div className="mb-3 flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
-              <User className="h-4 w-4" />
-            </div>
+            <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-700">
+              {user?.avatar_url ? (
+                <AvatarImage src={user.avatar_url} alt={user?.name ?? "Profile"} />
+              ) : null}
+              <AvatarFallback className="text-xs font-semibold">
+                {getInitials(user?.name)}
+              </AvatarFallback>
+            </Avatar>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-zinc-950 dark:text-white">
                 {user?.name || "Account"}
@@ -119,17 +139,17 @@ useEffect(() => {
             </div>
           </div>
           <button
-  type="button"
-  onClick={() => setTheme(theme === "dark" || (theme === "system" && resolvedTheme === "dark") ? "light" : "dark")}
-  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
->
-  {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? (
-    <Sun className="h-4 w-4" />
-  ) : (
-    <Moon className="h-4 w-4" />
-  )}
-  {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? "Light mode" : "Dark mode"}
-</button>
+            type="button"
+            onClick={() => setTheme(theme === "dark" || (theme === "system" && resolvedTheme === "dark") ? "light" : "dark")}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
+          >
+            {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+            {themeMounted && (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) ? "Light mode" : "Dark mode"}
+          </button>
           <button
             type="button"
             onClick={handleLogout}
@@ -196,9 +216,14 @@ useEffect(() => {
 
         <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
           <div className="mb-3 flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
-              <User className="h-4 w-4" />
-            </div>
+            <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-700">
+              {user?.avatar_url ? (
+                <AvatarImage src={user.avatar_url} alt={user?.name ?? "Profile"} />
+              ) : null}
+              <AvatarFallback className="text-xs font-semibold">
+                {getInitials(user?.name)}
+              </AvatarFallback>
+            </Avatar>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-zinc-950 dark:text-white">
                 {user?.name || "Account"}
