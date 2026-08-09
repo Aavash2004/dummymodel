@@ -15,6 +15,7 @@ type UserRecord = {
   phone?: string | null;
   address?: string | null;
   created_at?: string;
+  avatar_url?: string | null;
 };
 
 type SafeUser = Omit<UserRecord, "password">;
@@ -282,7 +283,7 @@ export async function findUserById(userId: number) {
   }
 
   const result = await query(
-    "SELECT id, name, email, username, phone, address, created_at FROM users WHERE id = $1",
+    "SELECT id, name, email, username, phone, address, avatar_url, created_at FROM users WHERE id = $1",
     [userId]
   );
   const user = result.rows[0] as SafeUser | undefined;
@@ -339,6 +340,31 @@ export async function updateUserContactInfo(
   const result = await query(
     "UPDATE users SET username = $1, phone = $2, address = $3 WHERE id = $4 RETURNING id, name, email, username, phone, address, created_at",
     [username, phone, address, userId]
+  );
+
+  if (result.rowCount === 0) {
+    return { success: false, error: "User not found" } as const;
+  }
+
+  return { success: true, user: result.rows[0] as SafeUser } as const;
+}
+export async function updateUserAvatar(userId: number, avatarUrl: string) {
+  const isDbReady = await ensureDb();
+
+  if (!isDbReady) {
+    await ensureFallbackUsersLoaded();
+    const user = fallbackUsers.find((u) => u.id === userId);
+    if (!user) return { success: false, error: "User not found" } as const;
+
+    user.avatar_url = avatarUrl;
+    await saveFallbackUsers();
+
+    return { success: true, user: stripPassword(user) } as const;
+  }
+
+  const result = await query(
+    "UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING id, name, email, username, phone, address, avatar_url, created_at",
+    [avatarUrl, userId]
   );
 
   if (result.rowCount === 0) {

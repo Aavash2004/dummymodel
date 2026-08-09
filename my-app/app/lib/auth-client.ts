@@ -9,6 +9,7 @@ export interface StoredUser {
   phone?: string | null;
   address?: string | null;
   created_at?: string;
+  avatar_url?: string | null;
 }
 
 export function setToken(token: string): void {

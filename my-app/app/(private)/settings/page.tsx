@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { getToken, getUser, setUser, clearToken, clearUser, type StoredUser } from "@/app/lib/auth-client";
@@ -16,13 +16,13 @@ import {
   AtSign,
   Phone,
   MapPin,
+  Camera,
 } from "lucide-react";
 import {
   Avatar,
-  AvatarBadge,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar"
+} from "@/components/ui/avatar";
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required."),
@@ -63,6 +63,10 @@ export default function SettingsPage() {
   const [addressError, setAddressError] = useState<string | undefined>();
   const [savingContact, setSavingContact] = useState(false);
 
+  // Avatar state
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Password state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -76,18 +80,20 @@ export default function SettingsPage() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const validateContactField = (field: "username" | "phone" | "address", value: string) => {
-  const fieldSchema = contactSchema.shape[field];
-  const result = fieldSchema.safeParse(value);
 
-  if (field === "username") {
-    setUsernameError(result.success ? undefined : result.error.issues[0].message);
-  } else if (field === "phone") {
-    setPhoneError(result.success ? undefined : result.error.issues[0].message);
-  } else if (field === "address") {
-    setAddressError(result.success ? undefined : result.error.issues[0].message);
-  }
-};
+  const validateContactField = (field: "username" | "phone" | "address", value: string) => {
+    const fieldSchema = contactSchema.shape[field];
+    const result = fieldSchema.safeParse(value);
+
+    if (field === "username") {
+      setUsernameError(result.success ? undefined : result.error.issues[0].message);
+    } else if (field === "phone") {
+      setPhoneError(result.success ? undefined : result.error.issues[0].message);
+    } else if (field === "address") {
+      setAddressError(result.success ? undefined : result.error.issues[0].message);
+    }
+  };
+
   useEffect(() => {
     const u = getUser();
     setStoredUser(u);
@@ -193,6 +199,43 @@ export default function SettingsPage() {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const response = await fetch("/api/me/avatar", {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.success === false) {
+        setToast({ message: data.error || "Failed to upload photo.", type: "error" });
+        return;
+      }
+
+      if (data.user) {
+        setUser(data.user);
+        setStoredUser(data.user);
+      }
+
+      setToast({ message: "Profile photo updated.", type: "success" });
+    } catch {
+      setToast({ message: "Unable to reach the server right now.", type: "error" });
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const handleDeleteAccount = async () => {
     setDeleting(true);
 
@@ -221,6 +264,14 @@ export default function SettingsPage() {
     }
   };
 
+  const initials =
+    storedUser?.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
+
   return (
     <div className="mx-auto max-w-3xl space-y-10 px-6 py-10 sm:py-14">
       <div className="space-y-2">
@@ -235,24 +286,44 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      {/* Avatar section */}
+      <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
+        <div className="flex items-center gap-5">
+          <Avatar className="h-20 w-20 border border-zinc-200 dark:border-zinc-700">
+            {storedUser?.avatar_url ? (
+              <AvatarImage src={storedUser.avatar_url} alt={storedUser?.name ?? "Profile"} />
+            ) : null}
+            <AvatarFallback className="text-lg font-bold">{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700/60 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <Camera className="h-4 w-4" />
+              {uploadingAvatar ? "Uploading..." : "Change photo"}
+            </button>
+            <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">JPG, PNG, or WebP. Max 5MB.</p>
+          </div>
+        </div>
+      </div>
+
       {/* Profile section */}
       <div className="rounded-3xl border border-zinc-200/80 bg-white p-8 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-          <Avatar className="h-20 w-20 border border-zinc-200">
-  <AvatarImage
-    src="https://github.com/shadcn.png"
-    alt={storedUser?.name ?? "Profile"}
-  />
-  <AvatarFallback>
-    {storedUser?.name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "CN"}
-  </AvatarFallback>
-</Avatar>
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
+              <AtSign className="h-4 w-4" />
+            </div>
             <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Profile</h2>
           </div>
           <button
@@ -266,7 +337,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Read-only name/email — never editable */}
-     <div className="mb-6 grid gap-4 sm:grid-cols-2">
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
               Full Name
@@ -318,7 +389,7 @@ export default function SettingsPage() {
                   validateContactField("phone", e.target.value);
                 }}
                 onBlur={(e) => validateContactField("phone", e.target.value)}
-                placeholder="+1 555 123 4567"
+                placeholder="1234567890"
                 disabled={savingContact}
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none dark:border-zinc-700/60 dark:bg-zinc-900/80 dark:text-zinc-100"
               />
