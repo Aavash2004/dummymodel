@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { X, Menu, Handshake, Moon, Sun, LogOut, User } from "lucide-react";
+import { X, Menu, Handshake, Moon, Sun, LogOut, User, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { getToken, clearToken } from "@/app/lib/auth-client";
@@ -136,9 +136,9 @@ export function Navbar() {
             className="group flex items-center gap-2 text-sm font-semibold tracking-tight text-zinc-950 transition hover:opacity-90 dark:text-zinc-100"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
-              <Handshake className="h-4 w-4" />
+              <Flag className="h-4 w-4" />
             </div>
-            <span className="font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Intern App</span>
+            <span className="font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Our Nepal</span>
           </Link>
 
           {/* Desktop Navigation Links */}

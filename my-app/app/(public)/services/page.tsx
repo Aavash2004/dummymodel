@@ -5,37 +5,15 @@ import {
   Palette,
   Code2,
   LifeBuoy,
-  Sparkles,
+  Sparkles,Mountain, Landmark, Utensils
 } from "lucide-react";
 
 const services = [
-  {
-    icon: Palette,
-    title: "Design",
-    description:
-      "Interfaces built around clarity — clean typography, thoughtful spacing, and layouts that guide the eye naturally.",
-  },
-  {
-    icon: Code2,
-    title: "Development",
-    description:
-      "Typed, maintainable React components shipped with performance and scalability in mind from day one.",
-  },
-  {
-    icon: LifeBuoy,
-    title: "Support",
-    description:
-      "Ongoing iteration and responsive support so your product keeps improving long after launch.",
-  },
-];
+  { icon: Mountain, title: "Travel & Adventure", description: "Discover trekking routes, mountain destinations, peaceful villages, and unforgettable adventures across Nepal.", }, { icon: Utensils, title: "Food & Flavors", description: "Explore Nepal through its food, from traditional dal bhat and momo to Newari cuisine and local specialties.", }, { icon: Landmark, title: "Culture & Heritage", description: "Learn about Nepal's festivals, traditions, ancient architecture, communities, and cultural heritage.", }, ];
+ ;
 
 const steps = [
-  { number: "01", title: "Discover", description: "We learn your goals, users, and constraints." },
-  { number: "02", title: "Design", description: "Wireframes and visuals refined into a clear system." },
-  { number: "03", title: "Build", description: "Clean, typed code shipped in focused iterations." },
-  { number: "04", title: "Support", description: "We stay on to refine and improve post-launch." },
-];
-
+ { number: "01", title: "Discover", description: "Find places, stories, and experiences worth exploring.", }, { number: "02", title: "Explore", description: "Dive deeper into Nepal's destinations, food, and culture.", }, { number: "03", title: "Experience", description: "See Nepal through local stories and authentic experiences.", }, { number: "04", title: "Share", description: "Discover something new and share the story with others.", }, ];
 export default function ServicesPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-50/50 px-6 py-12 text-zinc-900 dark:bg-zinc-950/50 dark:text-zinc-100 sm:py-20">
@@ -48,14 +26,13 @@ export default function ServicesPage() {
         {/* Header */}
         <div className="space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-            Services
+           Explore Nepal
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-5xl">
-            Design, development, and support.
+           Places, people, and stories worth discovering.
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-            We help shape product ideas into clear, functional applications
-            with clean structure.
+            From the Himalayas to the Terai, discover the destinations, traditions, flavors, and experiences that make Nepal unique.
           </p>
         </div>
 
@@ -63,7 +40,7 @@ export default function ServicesPage() {
        <div className="grid h-[420px] grid-cols-2 gap-4 sm:grid-cols-4 sm:grid-rows-2">
   <div className="relative col-span-2 row-span-2 h-full overflow-hidden rounded-3xl">
     <Image
-      src="/images/hote.jpg"
+      src="/images/s1.jpg"
       alt="Design process"
       fill
       className="object-cover transition duration-500 hover:scale-105"
@@ -71,7 +48,7 @@ export default function ServicesPage() {
   </div>
   <div className="relative col-span-1 row-span-1 h-full overflow-hidden rounded-3xl">
     <Image
-      src="/images/rru.jpg"
+      src="/images/s2.jpg"
       alt="Development work"
       fill
       className="object-cover transition duration-500 hover:scale-105"
@@ -79,7 +56,23 @@ export default function ServicesPage() {
   </div>
   <div className="relative col-span-1 row-span-1 h-full overflow-hidden rounded-3xl">
     <Image
-      src="/images/kfc.jpg"
+      src="/images/s3.jpg"
+      alt="Team support"
+      fill
+      className="object-cover transition duration-500 hover:scale-105"
+    />
+  </div>
+  <div className="relative col-span-1 row-span-1 h-full overflow-hidden rounded-3xl">
+    <Image
+      src="/images/s4.jpg"
+      alt="Team support"
+      fill
+      className="object-cover transition duration-500 hover:scale-105"
+    />
+  </div>
+  <div className="relative col-span-1 row-span-1 h-full overflow-hidden rounded-3xl">
+    <Image
+      src="/images/s5.jpg"
       alt="Team support"
       fill
       className="object-cover transition duration-500 hover:scale-105"
@@ -90,12 +83,7 @@ export default function ServicesPage() {
 
         {/* Services Grid */}
         <div className="space-y-8">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-zinc-400" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-              What we do
-            </p>
-          </div>
+          
 
           <div className="grid gap-5 sm:grid-cols-3">
             {services.map(({ icon: Icon, title, description }) => (

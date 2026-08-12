@@ -7,8 +7,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const images = [
   { src: "/images/about.jpg", alt: "Our workspace" },
-  { src: "/images/quan.jpg", alt: "Team collaborating" },
-  { src: "/images/oo.jpg", alt: "Product design process" },
+  { src: "/images/about2.jpg", alt: "Team collaborating" },
+  { src: "/images/about3.jpg", alt: "Product design process" },
+   { src: "/images/about4.jpg", alt: "Product design process" },
+    { src: "/images/about5.jpg", alt: "Product design process" },
+
 ];
 
 const AUTOPLAY_INTERVAL = 4000;
@@ -110,11 +113,10 @@ export default function AboutPage() {
             About
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-5xl">
-            Simple ideas, thoughtfully made.
+           Stories from a land of mountains.
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-            We focus on clean interfaces, clear layout structure, and web
-            applications that feel easy and direct to use.
+           A place to discover the stories, landscapes, traditions, food, people, and experiences that make Nepal truly unique.
           </p>
         </div>
 
@@ -122,23 +124,19 @@ export default function AboutPage() {
         <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
           <div className="space-y-4 lg:col-span-7">
             <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">
-              Our Focus
+              Our Story
             </h2>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              We eliminate unnecessary clutter and focus on what matters:
-              straightforward user navigation, fast page loads, and
-              maintainable code.
+              Nepal is more than the Himalayas. Behind its mountains are centuries-old cities, diverse communities, vibrant festivals, traditional food, quiet villages, and countless stories waiting to be discovered.
             </p>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Every page is designed with clean typography, responsive
-              layouts, and typed React components.
-            </p>
+This blog brings together travel guides, local experiences, cultural stories, food discoveries, and hidden places from across Nepal. Our goal is to help you see Nepal through the places and people that make it special.            </p>
             <div className="pt-2">
               <Link
                 href="/services"
                 className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
               >
-                <span>View services</span>
+                <span>Explore Stories</span>
                 <ArrowRight className="h-4 w-4 opacity-70" />
               </Link>
             </div>

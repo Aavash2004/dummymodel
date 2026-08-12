@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Code, ShieldCheck, Zap, Handshake, Sun, Cloud, CloudRain, Clock } from "lucide-react";
+import { ArrowRight, Code, ShieldCheck, Zap, Handshake, Sun, Cloud, CloudRain, Clock, Utensils, Camera } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const photos = [
-  { src: "/images/one.jpg", alt: "Photo 1" },
-  { src: "/images/2.jpg", alt: "Photo 2" },
+  { src: "/images/kv.jpg", alt: "Photo 1" },
+  { src: "/images/ls.jpg", alt: "Photo 2" },
   { src: "/images/3.jpg", alt: "Photo 3" },
   { src: "/images/eug.jpg", alt: "Photo 4" },
 ];
@@ -76,18 +76,18 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-1 text-xs font-semibold text-zinc-700 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-100">
               <Handshake className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
-              <span>Intern App</span>
+              <span>Stories from Nepal</span>
             </div>
             <TimeWeatherWidget />
           </div>
 
           <h1 className="text-4xl font-bold tracking-tight text-zinc-950 sm:text-6xl">
-            Thoughtful design & <br className="hidden sm:inline" />
-            <span className="text-zinc-600">simplified workflows.</span>
+            Discover Nepal <br className="hidden sm:inline" />
+            <span className="text-zinc-600">one story at a time.</span>
           </h1>
 
           <p className="max-w-2xl text-lg text-zinc-600 leading-relaxed">
-            A minimalist web application built with modern Next.js routes, clean UI components, and reliable backend integration.
+            Explore the places, people, food, culture, traditions, and experiences that make Nepal unique. Stories and guides for discovering Nepal beyond the usual destinations.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -95,7 +95,7 @@ export default function Home() {
               href="/auth/signup"
               className="group flex items-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-sm font-semibold text-white shadow-xs transition hover:bg-zinc-800"
             >
-              <span>Get started</span>
+              <span>Explore Stories</span>
               <ArrowRight className="h-4 w-4 text-zinc-400 transition-transform group-hover:translate-x-1 group-hover:text-white" />
             </Link>
 
@@ -103,7 +103,7 @@ export default function Home() {
               href="/about"
               className="rounded-full border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100 dark:border-zinc-700/60 dark:bg-zinc-950/80 dark:text-zinc-100 dark:hover:bg-zinc-800"
             >
-              Learn more
+              About Nepal
             </Link>
           </div>
         </section>
@@ -126,7 +126,7 @@ export default function Home() {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
             <div className="flex flex-col items-center justify-center space-y-2 text-center">
               <span className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-widest text-white uppercase drop-shadow-lg select-none">
-                LEARN
+               Nepal
               </span>
               <span className="h-1 w-12 rounded-full bg-white/80" />
             </div>
@@ -140,8 +140,8 @@ export default function Home() {
               <Image src={photos[0].src} alt={photos[0].alt} fill priority className="object-cover" />
             </div>
             <div className="p-4 space-y-1">
-              <h2 className="text-lg font-bold text-zinc-950 dark:text-zinc-100">Minimal UI Elements</h2>
-              <p className="text-sm text-zinc-600 dark:text-zinc-300">Clean card structures, clear typography, and balanced spacing.</p>
+              <h2 className="text-lg font-bold text-zinc-950 dark:text-zinc-100">Culture</h2>
+              <p className="text-sm text-zinc-600 dark:text-zinc-300">The Culture Behind Kathmandu Valley</p>
             </div>
           </div>
 
@@ -150,8 +150,8 @@ export default function Home() {
               <Image src={photos[1].src} alt={photos[1].alt} fill className="object-cover" />
             </div>
             <div className="p-4 space-y-1">
-              <h2 className="text-lg font-bold text-zinc-950">Focused Experience</h2>
-              <p className="text-sm text-zinc-600">Uncluttered interface designed around core user actions.</p>
+              <h2 className="text-lg font-bold text-zinc-950">Travel</h2>
+              <p className="text-sm text-zinc-600">Explore stunning landscapes and rich cultures around the Nepal.</p>
             </div>
           </div>
         </section>
@@ -160,31 +160,31 @@ export default function Home() {
         <section className="grid gap-6 sm:grid-cols-3">
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100">
-              <Zap className="h-5 w-5" />
+              < Zap className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Fast & Responsive</h3>
+            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Travel & Adventure</h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
-              Built on React 19 and Next.js App Router for immediate page navigation.
+           Trekking routes, hidden destinations, travel guides, and unforgettable adventures across Nepal
             </p>
           </div>
 
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100">
-              <Code className="h-5 w-5" />
+              <Utensils className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Clean Codebase</h3>
+            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Food & Flavors</h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
-              Structured TypeScript components using standard utility-first CSS.
+              Discover momo, dal bhat, Newari cuisine, local dishes, and the stories behind Nepali food culture.
             </p>
           </div>
 
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 space-y-3 shadow-2xs dark:border-zinc-700/60 dark:bg-zinc-950/80">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-950 text-white">
-              <ShieldCheck className="h-5 w-5" />
+              <Camera className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">Secure Auth</h3>
+            <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">People & Culture</h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
-              PostgreSQL database integration with bcrypt password hashing.
+              Stories about Nepali communities, festivals, traditions, heritage, and the people who keep them alive.
             </p>
           </div>
         </section>
