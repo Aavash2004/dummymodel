@@ -373,3 +373,118 @@ export async function updateUserAvatar(userId: number, avatarUrl: string) {
 
   return { success: true, user: result.rows[0] as SafeUser } as const;
 }
+export interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  featured_image: string | null;
+  category: string;
+  status: "DRAFT" | "PUBLISHED";
+  author_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getAllPosts() {
+  const result = await query("SELECT * FROM posts ORDER BY created_at DESC");
+  return result.rows as Post[];
+}
+
+export async function getPublishedPosts() {
+  const result = await query(
+    "SELECT * FROM posts WHERE status = 'PUBLISHED' ORDER BY created_at DESC"
+  );
+  return result.rows as Post[];
+}
+
+export async function getPostById(id: number) {
+  const result = await query("SELECT * FROM posts WHERE id = $1", [id]);
+  return (result.rows[0] as Post | undefined) || null;
+}
+
+export async function getPostBySlug(slug: string) {
+  const result = await query(
+    "SELECT * FROM posts WHERE slug = $1 AND status = 'PUBLISHED'",
+    [slug]
+  );
+  return (result.rows[0] as Post | undefined) || null;
+}
+
+export async function isSlugTaken(slug: string, excludeId?: number) {
+  if (excludeId) {
+    const result = await query(
+      "SELECT 1 FROM posts WHERE slug = $1 AND id != $2",
+      [slug, excludeId]
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+  const result = await query("SELECT 1 FROM posts WHERE slug = $1", [slug]);
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function createPost(data: {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  featuredImage?: string;
+  category: string;
+  status: "DRAFT" | "PUBLISHED";
+  authorId: number;
+}) {
+  const result = await query(
+    `INSERT INTO posts (title, slug, excerpt, content, featured_image, category, status, author_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING *`,
+    [
+      data.title,
+      data.slug,
+      data.excerpt,
+      data.content,
+      data.featuredImage || null,
+      data.category,
+      data.status,
+      data.authorId,
+    ]
+  );
+  return result.rows[0] as Post;
+}
+
+export async function updatePost(
+  id: number,
+  data: {
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    featuredImage?: string;
+    category: string;
+    status: "DRAFT" | "PUBLISHED";
+  }
+) {
+  const result = await query(
+    `UPDATE posts
+     SET title = $1, slug = $2, excerpt = $3, content = $4,
+         featured_image = $5, category = $6, status = $7, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $8
+     RETURNING *`,
+    [
+      data.title,
+      data.slug,
+      data.excerpt,
+      data.content,
+      data.featuredImage || null,
+      data.category,
+      data.status,
+      id,
+    ]
+  );
+  return (result.rows[0] as Post | undefined) || null;
+}
+
+export async function deletePost(id: number) {
+  const result = await query("DELETE FROM posts WHERE id = $1", [id]);
+  return (result.rowCount ?? 0) > 0;
+}
