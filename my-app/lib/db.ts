@@ -488,3 +488,49 @@ export async function deletePost(id: number) {
   const result = await query("DELETE FROM posts WHERE id = $1", [id]);
   return (result.rowCount ?? 0) > 0;
 }
+// --- Activity Log ---
+
+export async function logActivity(
+  action: string,
+  description: string,
+  userId: number | null
+) {
+  const result = await query(
+    `INSERT INTO activity_log (action, description, user_id)
+     VALUES ($1, $2, $3)
+     RETURNING id, action, description, user_id, created_at`,
+    [action, description, userId]
+  );
+  return result.rows[0];
+}
+
+export async function getRecentActivity(limit: number = 10) {
+  const result = await query(
+    `SELECT id, action, description, user_id, created_at
+     FROM activity_log
+     ORDER BY created_at DESC
+     LIMIT $1`,
+    [limit]
+  );
+  return result.rows;
+}
+
+export async function getDashboardStats() {
+  const [usersResult, newUsersResult, postsResult, activityResult] =
+    await Promise.all([
+      query(`SELECT COUNT(*)::int AS count FROM users`),
+      query(
+        `SELECT COUNT(*)::int AS count FROM users
+         WHERE created_at >= date_trunc('month', CURRENT_DATE)`
+      ),
+      query(`SELECT COUNT(*)::int AS count FROM posts`),
+      query(`SELECT COUNT(*)::int AS count FROM activity_log`),
+    ]);
+
+  return {
+    totalUsers: usersResult.rows[0].count,
+    newUsers: newUsersResult.rows[0].count,
+    totalPosts: postsResult.rows[0].count,
+    totalActivity: activityResult.rows[0].count,
+  };
+}

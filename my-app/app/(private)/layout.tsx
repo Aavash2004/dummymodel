@@ -3,7 +3,7 @@ import { getToken, getUser, clearToken, clearUser, type StoredUser } from "@/app
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, User, Settings, LogOut, Handshake, Menu, X } from "lucide-react";
+import { LayoutDashboard, User, Settings, LogOut, Handshake, Menu, X, LucideCamera } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import {
@@ -16,6 +16,7 @@ const privateLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/profile", label: "Profile", icon: User },
   { href: "/settings", label: "Settings", icon: Settings },
+  {href:"/blogs", label:"Blogs", icon:LucideCamera},
 ];
 
 function getInitials(name?: string | null) {

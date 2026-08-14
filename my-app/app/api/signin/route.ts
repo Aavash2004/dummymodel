@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { createUserRecord, findUserByEmailAndPassword } from "@/lib/db";
-
+import { logActivity } from "@/lib/db";
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function POST(request: NextRequest) {
@@ -33,7 +33,11 @@ export async function POST(request: NextRequest) {
       if (!result.success) {
         return NextResponse.json({ error: "Email already exists" }, { status: 409 });
       }
-
+       await logActivity(
+  "USER_REGISTERED",
+  `New user registered: ${result.user.email}`,
+  result.user.id
+);
       const token = jwt.sign(
         { userId: result.user.id, email: result.user.email },
         JWT_SECRET,
@@ -81,3 +85,4 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ error: "Unknown action." }, { status: 400 });
 }
+

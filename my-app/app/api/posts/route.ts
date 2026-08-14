@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAllPosts, createPost, isSlugTaken } from "@/lib/db";
 import { verifyToken } from "@/app/lib/auth-server";
+import { logActivity } from "@/lib/db";
 
 const createPostSchema = z.object({
   title: z.string().trim().min(1, "Title is required.").max(255, "Title is too long."),
@@ -78,6 +79,11 @@ export async function POST(request: NextRequest) {
       authorId: payload.userId,
     });
 
+    await logActivity(
+  "POST_CREATED",
+  `Post created: "${post.title}"`,
+  payload.userId
+);
     return NextResponse.json(
       { message: "Post created successfully.", post },
       { status: 201 }

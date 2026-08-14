@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getPostById, updatePost, deletePost, isSlugTaken } from "@/lib/db";
 import { verifyToken } from "@/app/lib/auth-server";
+import { logActivity } from "@/lib/db";
 
 const updatePostSchema = z.object({
   title: z.string().trim().min(1, "Title is required.").max(255, "Title is too long."),
@@ -102,7 +103,14 @@ export async function PATCH(
       category: parsed.data.category,
       status: parsed.data.status,
     });
-
+    if (!updated) {
+  return NextResponse.json({ error: "Post not found." }, { status: 404 });
+}
+    await logActivity(
+  "POST_UPDATED",
+  `Post updated: "${updated.title}"`,
+  payload.userId
+);
     return NextResponse.json({ message: "Post updated successfully.", post: updated }, { status: 200 });
   } catch (error) {
     console.error("Update post error:", error);
@@ -132,6 +140,11 @@ export async function DELETE(
     }
 
     await deletePost(id);
+      await logActivity(
+    "POST_DELETED",
+    `Post deleted: "${existing.title}"`,
+    payload.userId
+  );
     return NextResponse.json({ message: "Post deleted successfully." }, { status: 200 });
   } catch (error) {
     console.error("Delete post error:", error);
