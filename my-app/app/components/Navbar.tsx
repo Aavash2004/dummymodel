@@ -19,6 +19,7 @@ const navLinks: NavLink[] = [
   { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/contact", label: "Contact" },
+  {href: "/blog", label: "Blog"},
 ];
 
 const TRANSITION_MS = 250;

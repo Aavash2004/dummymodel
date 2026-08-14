@@ -24,11 +24,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
 
 import {
   DropdownMenu,
@@ -47,65 +42,75 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type PostStatus = "Published" | "Draft";
-
-type Post = {
+type ApiPost = {
   id: number;
   title: string;
+  slug: string;
   excerpt: string;
   category: string;
-  status: PostStatus;
-  date: string;
+  status: "DRAFT" | "PUBLISHED";
+  created_at: string;
+  updated_at?: string;
 };
 
-const initialPosts: Post[] = [
-  {
-    id: 1,
-    title: "Exploring Kathmandu",
-    excerpt: "A guide to exploring the cultural heart of Nepal.",
-    category: "Travel",
-    status: "Published",
-    date: "Aug 13, 2026",
-  },
-  {
-    id: 2,
-    title: "The Beauty of Nepal",
-    excerpt: "Discovering the landscapes, culture and people of Nepal.",
-    category: "Travel",
-    status: "Published",
-    date: "Aug 11, 2026",
-  },
-  {
-    id: 3,
-    title: "My Journey as a Developer",
-    excerpt: "Lessons learned while building modern web applications.",
-    category: "Development",
-    status: "Draft",
-    date: "Aug 9, 2026",
-  },
-  {
-    id: 4,
-    title: "Getting Started with Next.js",
-    excerpt: "A beginner-friendly introduction to Next.js.",
-    category: "Development",
-    status: "Published",
-    date: "Aug 7, 2026",
-  },
-];
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
-export default function DashboardPage() {
+export default function BlogsPage() {
   const router = useRouter();
 
   const [checked, setChecked] = useState(false);
   const [user, setUser] = useState<StoredUser | null>(null);
 
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | PostStatus>(
-    "All"
-  );
+  const [posts, setPosts] = useState<ApiPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [deletePost, setDeletePost] = useState<Post | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "All" | "PUBLISHED" | "DRAFT"
+  >("All");
+
+  const [deletePost, setDeletePost] = useState<ApiPost | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchPosts = async (token: string) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/posts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to load posts.");
+      }
+
+      const data = await res.json();
+
+      const list: ApiPost[] = Array.isArray(data)
+        ? data
+        : data.posts ?? [];
+
+      setPosts(list);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const token = getToken();
@@ -117,234 +122,477 @@ export default function DashboardPage() {
 
     setUser(getUser());
     setChecked(true);
+    fetchPosts(token);
   }, [router]);
 
   const filteredPosts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
     return posts.filter((post) => {
       const matchesSearch =
-        post.title.toLowerCase().includes(search.toLowerCase()) ||
-        post.category.toLowerCase().includes(search.toLowerCase());
+        !query ||
+        post.title.toLowerCase().includes(query) ||
+        post.category.toLowerCase().includes(query);
 
       const matchesStatus =
-        statusFilter === "All" || post.status === statusFilter;
+        statusFilter === "All" ||
+        post.status === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
   }, [posts, search, statusFilter]);
 
   const publishedCount = posts.filter(
-    (post) => post.status === "Published"
+    (post) => post.status === "PUBLISHED"
   ).length;
 
-  const draftCount = posts.filter((post) => post.status === "Draft").length;
+  const draftCount = posts.filter(
+    (post) => post.status === "DRAFT"
+  ).length;
 
-  const handleDelete = () => {
+  const categoryCount = new Set(
+    posts.map((post) => post.category)
+  ).size;
+
+  const handleDelete = async () => {
     if (!deletePost) return;
 
-    setPosts((currentPosts) =>
-      currentPosts.filter((post) => post.id !== deletePost.id)
-    );
+    const token = getToken();
 
-    setDeletePost(null);
+    if (!token) return;
+
+    setDeleting(true);
+
+    try {
+      const res = await fetch(
+        `/api/posts/${deletePost.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to delete post.");
+      }
+
+      setPosts((current) =>
+        current.filter(
+          (post) => post.id !== deletePost.id
+        )
+      );
+
+      setDeletePost(null);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to delete post."
+      );
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (!checked) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="flex items-center gap-2 text-sm text-zinc-500">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-400" />
+      <main className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <p className="text-sm text-zinc-500">
           Loading...
-        </div>
+        </p>
       </main>
     );
   }
 
-  const initials =
-    user?.name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "?";
-
   const stats = [
     {
-      label: "Total Posts",
+      label: "Total posts",
       value: posts.length,
       icon: FileText,
-      accent:
-        "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400",
     },
     {
       label: "Published",
       value: publishedCount,
       icon: CheckCircle2,
-      accent:
-        "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
     },
     {
       label: "Drafts",
       value: draftCount,
       icon: FileEdit,
-      accent:
-        "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400",
     },
     {
       label: "Categories",
-      value: new Set(posts.map((post) => post.category)).size,
+      value: categoryCount,
       icon: ListOrdered,
-      accent:
-        "bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400",
     },
   ];
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-zinc-50/70 px-6 py-10 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-      {/* Background wash — matches private-area palette (rose/amber/blue) */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-rose-300/20 blur-3xl dark:bg-rose-500/10" />
-        <div className="absolute -right-16 top-40 h-80 w-80 rounded-full bg-amber-300/20 blur-3xl dark:bg-amber-500/10" />
-        <div className="absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-blue-300/20 blur-3xl dark:bg-blue-500/10" />
-      </div>
-
-      <div className="mx-auto max-w-7xl space-y-10">
+    <main className="min-h-screen bg-zinc-50 px-5 py-8 text-zinc-900 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <header className="mb-8 flex flex-col gap-5 border-b border-zinc-200 pb-7 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-xl uppercase tracking-widest text-zinc-500">
-              BLOGS
+            <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
+              Content
             </p>
-            <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-              Manage your blog posts and content from here.
+
+            <h1 className="text-3xl font-semibold tracking-tight">
+              Blog
+            </h1>
+
+            <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-500">
+              Manage published articles and drafts from one place.
             </p>
           </div>
 
-          
-        </div>
+          <Button
+            onClick={() =>
+              router.push("/dashboard/posts/new")
+            }
+            className="w-fit gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            New Blog
+          </Button>
+        </header>
+
+        {/* Error */}
+        {error && (
+          <div className="mb-6 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Statistics */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map(({ label, value, icon: Icon, accent }) => (
+        <div className="mb-8 grid grid-cols-2 border border-zinc-200 bg-white sm:grid-cols-4">
+          {stats.map(({ label, value, icon: Icon }, index) => (
             <div
               key={label}
-              className="rounded-2xl border bg-white p-6 transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+              className={`flex items-center justify-between px-5 py-5 ${
+                index > 0
+                  ? "border-l border-zinc-200"
+                  : ""
+              }`}
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-zinc-500">{label}</p>
-                  <p className="mt-2 text-3xl font-bold tabular-nums">
-                    {value}
-                  </p>
-                </div>
+              <div>
+                <p className="text-xs font-medium text-zinc-500">
+                  {label}
+                </p>
 
-                <div className={`rounded-xl p-3 ${accent}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
+                <p className="mt-1 text-2xl font-semibold tracking-tight">
+                  {loading ? "—" : value}
+                </p>
               </div>
+
+              <Icon className="h-4 w-4 text-zinc-400" />
             </div>
           ))}
         </div>
 
-        {/* Posts Section */}
-        <section className="rounded-2xl border bg-white  dark:border-zinc-800 dark:bg-zinc-900">
-          {/* Section Header */}
-          <div className="flex flex-col gap-4 border-b p-6 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Blog Posts</h2>
-              <p className="mt-1 text-sm text-zinc-500">
-                Create, edit and manage your blog posts.
-              </p>
-            </div>
+        {/* Posts */}
+        <section className="border border-zinc-200 bg-white">
+          {/* Toolbar */}
+          <div className="border-b border-zinc-200 px-5 py-5 sm:px-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="font-semibold">
+                  All Blogs
+                </h2>
 
-            <Button
-              onClick={() => router.push("/dashboard/posts/new")}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              New Post
-            </Button>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {loading
+                    ? "Loading posts..."
+                    : `${posts.length} ${
+                        posts.length === 1
+                          ? "post"
+                          : "posts"
+                      } in total`}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {/* Search */}
+                <div className="relative sm:w-64">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+
+                  <Input
+                    placeholder="Search posts"
+                    value={search}
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
+                    className="h-9 border-zinc-200 pl-9 text-sm shadow-none"
+                  />
+                </div>
+
+                {/* Filter */}
+                <div className="flex border border-zinc-200">
+                  {[
+                    ["All", "All"],
+                    ["Published", "PUBLISHED"],
+                    ["Drafts", "DRAFT"],
+                  ].map(([label, value]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() =>
+                        setStatusFilter(
+                          value as
+                            | "All"
+                            | "PUBLISHED"
+                            | "DRAFT"
+                        )
+                      }
+                      className={`px-3 py-2 text-xs font-medium transition ${
+                        statusFilter === value
+                          ? "bg-zinc-900 text-white"
+                          : "bg-white text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Search + Filter */}
-          <div className="flex flex-col gap-4 border-b p-6 dark:border-zinc-800 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-
-              <Input
-                placeholder="Search posts..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant={statusFilter === "All" ? "default" : "outline"}
-                onClick={() => setStatusFilter("All")}
-                className="flex-1 sm:flex-none"
-              >
-                All
-              </Button>
-
-              <Button
-                variant={statusFilter === "Published" ? "default" : "outline"}
-                onClick={() => setStatusFilter("Published")}
-                className="flex-1 sm:flex-none"
-              >
-                Published
-              </Button>
-
-              <Button
-                variant={statusFilter === "Draft" ? "default" : "outline"}
-                onClick={() => setStatusFilter("Draft")}
-                className="flex-1 sm:flex-none"
-              >
-                Drafts
-              </Button>
-            </div>
+          {/* Table Header */}
+          <div className="hidden border-b border-zinc-200 bg-zinc-50 px-6 py-3 text-xs font-medium text-zinc-500 md:grid md:grid-cols-[1fr_150px_130px_80px] md:gap-6">
+            <span>Post</span>
+            <span>Category</span>
+            <span>Status</span>
+            <span className="text-right">Date</span>
           </div>
 
           {/* Posts */}
-          <div className="divide-y dark:divide-zinc-800">
-            {filteredPosts.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 p-16 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                  <FileText className="h-6 w-6 text-zinc-400" />
-                </div>
+          <div>
+            {loading ? (
+              <div className="flex min-h-56 items-center justify-center">
+                <p className="text-sm text-zinc-400">
+                  Loading posts...
+                </p>
+              </div>
+            ) : filteredPosts.length === 0 ? (
+              <div className="flex min-h-64 flex-col items-center justify-center px-6 text-center">
+                <FileText className="h-7 w-7 text-zinc-300" />
 
-                <h3 className="font-semibold">No posts found</h3>
+                <h3 className="mt-4 text-sm font-semibold">
+                  No posts found
+                </h3>
 
-                <p className="max-w-xs text-sm text-zinc-500">
-                  Nothing matches your search or filter yet. Try clearing them,
-                  or create your first post.
+                <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
+                  {search || statusFilter !== "All"
+                    ? "Try adjusting your search or filter."
+                    : "Create your first post to get started."}
                 </p>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 gap-2"
-                  onClick={() => router.push("/dashboard/posts/new")}
-                >
-                  <Plus className="h-4 w-4" />
-                  New Post
-                </Button>
+                {!search &&
+                  statusFilter === "All" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4"
+                      onClick={() =>
+                        router.push(
+                          "/dashboard/posts/new"
+                        )
+                      }
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      New post
+                    </Button>
+                  )}
               </div>
             ) : (
               filteredPosts.map((post) => (
-                <div
+                <article
                   key={post.id}
-                  className="group relative flex flex-col gap-4 py-5 pl-6 pr-6 transition hover:bg-zinc-50 dark:hover:bg-zinc-800/40 sm:flex-row sm:items-center sm:justify-between"
+                  className="group grid gap-4 border-b border-zinc-100 px-5 py-5 last:border-b-0 hover:bg-zinc-50/70 sm:px-6 md:grid-cols-[1fr_150px_130px_80px] md:items-center md:gap-6"
                 >
-                    <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                      inproces
+                  {/* Post */}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="truncate text-sm font-semibold">
+                        {post.title}
+                      </h3>
+
+                      <span className="hidden text-[10px] text-zinc-400 sm:inline">
+                        #{post.id}
+                      </span>
                     </div>
-                </div>
+
+                    <p className="mt-1 line-clamp-1 text-xs leading-5 text-zinc-500">
+                      {post.excerpt}
+                    </p>
+
+                    {/* Mobile actions */}
+                    <div className="mt-3 flex items-center gap-3 md:hidden">
+                      <span className="text-xs text-zinc-400">
+                        {formatDate(post.created_at)}
+                      </span>
+
+                      <span className="text-zinc-300">
+                        ·
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            `/blog/${post.slug}`
+                          )
+                        }
+                        className="text-xs font-medium text-zinc-600 hover:text-zinc-900"
+                      >
+                        View
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/posts/${post.id}/edit`
+                          )
+                        }
+                        className="text-xs font-medium text-zinc-600 hover:text-zinc-900"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <span className="text-xs text-zinc-600">
+                      {post.category}
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+                      {post.status === "PUBLISHED" ? (
+                        <>
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Published
+                        </>
+                      ) : (
+                        <>
+                          <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                          Draft
+                        </>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Date + Actions */}
+                  <div className="hidden items-center justify-end gap-1 md:flex">
+                    <span className="mr-2 whitespace-nowrap text-xs text-zinc-400">
+                      {formatDate(post.created_at)}
+                    </span>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/blog/${post.slug}`
+                            )
+                          }
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/posts/${post.id}/edit`
+                            )
+                          }
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem
+                          className="text-red-600 focus:text-red-600"
+                          onClick={() =>
+                            setDeletePost(post)
+                          }
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </article>
               ))
             )}
           </div>
         </section>
-      </div>  
+      </div>
+
+      {/* Delete Confirmation */}
+      <Dialog
+        open={!!deletePost}
+        onOpenChange={(open) => {
+          if (!open) setDeletePost(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Delete post?
+            </DialogTitle>
+
+            <DialogDescription>
+              This will permanently delete{" "}
+              <span className="font-medium text-zinc-900">
+                {deletePost?.title}
+              </span>
+              . This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeletePost(null)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

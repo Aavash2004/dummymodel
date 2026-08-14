@@ -92,8 +92,8 @@ try {
             : formData.featuredImage.trim(),
       };
 
-      const response = await fetch("/api/posts", {
-        method: "POST",
+      const response = await fetch(`/api/posts/${id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getToken()}`,

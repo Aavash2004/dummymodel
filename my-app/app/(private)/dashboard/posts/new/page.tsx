@@ -11,7 +11,8 @@ import { getToken } from "@/app/lib/auth-client";
 
 export default function NewPostPage() {
   const router = useRouter();
-
+const [uploadingImage, setUploadingImage] = useState(false);
+const [imageError, setImageError] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -99,6 +100,36 @@ export default function NewPostPage() {
       setLoading(false);
     }
   };
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  setImageError("");
+  setUploadingImage(true);
+
+  try {
+    const body = new FormData();
+    body.append("image", file);
+
+    const res = await fetch("/api/posts/upload-image", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Upload failed.");
+    }
+
+    setFormData((prev) => ({ ...prev, featuredImage: data.url }));
+  } catch (err) {
+    setImageError(err instanceof Error ? err.message : "Upload failed.");
+  } finally {
+    setUploadingImage(false);
+  }
+};
 
   return (
     <main className="min-h-screen bg-zinc-50/70 px-6 py-10 dark:bg-zinc-950">
@@ -238,43 +269,52 @@ export default function NewPostPage() {
           </section>
 
           {/* Image */}
-          <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold">
-                Featured Image
-              </h2>
+         <div className="space-y-2">
+  <label htmlFor="featuredImage" className="text-sm font-medium">
+    Image
+  </label>
 
-              <p className="mt-1 text-sm text-zinc-500">
-                Add an image that represents your blog post.
-              </p>
-            </div>
+  {formData.featuredImage ? (
+    <div className="relative overflow-hidden rounded-lg border dark:border-zinc-800">
+      <img
+        src={formData.featuredImage}
+        alt="Featured"
+        className="h-48 w-full object-cover"
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="absolute right-2 top-2"
+        onClick={() =>
+          setFormData((prev) => ({ ...prev, featuredImage: "" }))
+        }
+      >
+        Remove
+      </Button>
+    </div>
+  ) : (
+    <label
+      htmlFor="image-upload"
+      className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-8 text-center text-sm text-zinc-500 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/40"
+    >
+      <ImagePlus className="h-6 w-6 text-zinc-400" />
+      {uploadingImage ? "Uploading..." : "Click to upload an image"}
+      <input
+        id="image-upload"
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageUpload}
+        disabled={uploadingImage}
+      />
+    </label>
+  )}
 
-            <div className="space-y-2">
-              <label
-                htmlFor="featuredImage"
-                className="text-sm font-medium"
-              >
-                Image URL
-              </label>
-
-              <div className="relative">
-                <ImagePlus className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-
-                <Input
-                  id="featuredImage"
-                  name="featuredImage"
-                  value={formData.featuredImage}
-                  onChange={handleChange}
-                  placeholder="https://example.com/image.jpg"
-                  className="pl-9"
-                />
-              </div>
-
-              <p className="text-xs text-zinc-500">
-                You can connect this field to Cloudinary later.
-              </p>
-            </div>
-          </section>
+  {imageError && (
+    <p className="text-xs text-red-600 dark:text-red-400">{imageError}</p>
+  )}
+</div>
 
           {/* Post Settings */}
           <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
