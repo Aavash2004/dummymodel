@@ -83,13 +83,6 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="relative flex min-h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-      {/* Background wash — private workspace palette */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-rose-400/30 blur-3xl dark:bg-rose-500/15" />
-        <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-amber-400/25 blur-3xl dark:bg-amber-500/15" />
-        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-blue-400/25 blur-3xl dark:bg-blue-500/10" />
-      </div>
-
       {/* Sidebar (desktop) */}
       <aside className="hidden w-64 flex-col border-r border-white/40 bg-white/60 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/50 sm:flex">
         <div className="flex items-center gap-2 border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">

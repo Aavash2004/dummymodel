@@ -16,6 +16,7 @@ type UserRecord = {
   address?: string | null;
   created_at?: string;
   avatar_url?: string | null;
+  role: "user"| "admin";
 };
 
 type SafeUser = Omit<UserRecord, "password">;
@@ -140,6 +141,8 @@ export async function createUserRecord(name: string, email: string, password: st
       name,
       email,
       password: hashedPassword,
+      role: "user",
+      
     };
     fallbackUsers.push(newUser);
     await saveFallbackUsers();

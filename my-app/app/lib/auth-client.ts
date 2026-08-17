@@ -5,6 +5,7 @@ export interface StoredUser {
   id: number;
   name: string;
   email: string;
+  role: "user" | "admin"
   username?: string | null;
   phone?: string | null;
   address?: string | null;

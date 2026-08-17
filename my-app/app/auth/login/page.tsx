@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
-import { Button } from "@/app/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Input } from "@/app/components/ui/input";
-import { Toast, ToastViewport } from "@/app/components/ui/toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Toast, ToastViewport } from "@/components/ui/toast";
 import { EyeIcon, EyeOffIcon, ArrowRight, Handshake } from "lucide-react";
 import { setToken, setUser } from "@/app/lib/auth-client";
 
@@ -151,7 +151,7 @@ export default function LoginPage() {
                       if (errors.password) validateField("password", e.target.value);
                     }}
                     onBlur={(e) => validateField("password", e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="password"
                     className="pr-10 rounded-xl border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-500 dark:focus-visible:ring-zinc-500/20"
                     disabled={isSubmitting}
                   />

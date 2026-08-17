@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { getToken, getUser, setUser, clearToken, clearUser, type StoredUser } from "@/app/lib/auth-client";
-import { Toast, ToastViewport } from "@/app/components/ui/toast";
+import { Toast, ToastViewport } from "@/components/ui/toast";
 import {
   Lock,
   Trash2,

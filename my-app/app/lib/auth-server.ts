@@ -5,6 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 interface TokenPayload {
   userId: number;
   email: string;
+  role: "user"|"admin"
 }
 
 export function verifyToken(authHeader: string | null): TokenPayload | null {
@@ -16,4 +17,7 @@ export function verifyToken(authHeader: string | null): TokenPayload | null {
   } catch {
     return null;
   }
+}
+export function requireAdmin(payload: TokenPayload | null):boolean {
+ return payload?.role ==="admin";
 }

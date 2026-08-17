@@ -7,7 +7,7 @@ import { ArrowLeft, ImagePlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getToken } from "@/app/lib/auth-client";
-
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -74,7 +74,7 @@ const [imageError, setImageError] = useState("");
           formData.featuredImage.trim() === "" ? undefined : formData.featuredImage.trim(),
       };
 
-      const response = await fetch("/api/posts", {
+      const response = await fetch("/api/admin/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,9 +84,9 @@ const [imageError, setImageError] = useState("");
       });
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create post");
-      }
+     if (!response.ok) {
+  throw new Error(data.error || data.message || "Failed to create post");
+}
 
       router.push("/dashboard");
       router.refresh();
@@ -111,7 +111,7 @@ const [imageError, setImageError] = useState("");
     const body = new FormData();
     body.append("image", file);
 
-    const res = await fetch("/api/posts/upload-image", {
+    const res = await fetch("/api/admin/posts/upload-image", {
       method: "POST",
       headers: { Authorization: `Bearer ${getToken()}` },
       body,
@@ -152,7 +152,7 @@ const [imageError, setImageError] = useState("");
             </p>
 
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
-              Create New Post
+              Create New Blog
             </h1>
 
             <p className="mt-2 text-zinc-500 dark:text-zinc-400">
@@ -161,112 +161,114 @@ const [imageError, setImageError] = useState("");
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+ {/* Form */}
+<form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Basic Information */}
-          <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold">
-                Basic Information
-              </h2>
+  {/* Basic Information */}
+  <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="mb-6">
+      <h2 className="text-lg font-semibold">
+        Basic Information
+      </h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
-                Add the main information about your post.
-              </p>
-            </div>
+      <p className="mt-1 text-sm text-zinc-500">
+        Add the main information about your post.
+      </p>
+    </div>
 
-            <div className="space-y-5">
+    <div className="space-y-5">
 
-              {/* Title */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="title"
-                  className="text-sm font-medium"
-                >
-                  Title
-                </label>
+      {/* Title */}
+      <div className="space-y-2">
+        <label
+          htmlFor="title"
+          className="text-sm font-medium"
+        >
+          Title
+        </label>
 
-                <Input
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleTitleChange}
-                  placeholder="Enter your post title"
-                  required
-                />
-              </div>
+        <Input
+          id="title"
+          name="title"
+          value={formData.title}
+          onChange={handleTitleChange}
+          placeholder="Enter your post title"
+          required
+        />
+      </div>
 
-              {/* Slug */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="slug"
-                  className="text-sm font-medium"
-                >
-                  Slug
-                </label>
+      {/* Slug */}
+      <div className="space-y-2">
+        <label
+          htmlFor="slug"
+          className="text-sm font-medium"
+        >
+          Slug
+        </label>
 
-                <Input
-                  id="slug"
-                  name="slug"
-                  value={formData.slug}
-                  onChange={handleChange}
-                  placeholder="your-post-slug"
-                  required
-                />
+        <Input
+          id="slug"
+          name="slug"
+          value={formData.slug}
+          onChange={handleChange}
+          placeholder="your-post-slug"
+          required
+        />
 
-                <p className="text-xs text-zinc-500">
-                  This will be used in the blog URL.
-                </p>
-              </div>
+        <p className="text-xs text-zinc-500">
+          This will be used in the blog URL.
+        </p>
+      </div>
 
-              {/* Excerpt */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="excerpt"
-                  className="text-sm font-medium"
-                >
-                  Excerpt
-                </label>
+      {/* Excerpt */}
+      <div className="space-y-2">
+        <label
+          htmlFor="excerpt"
+          className="text-sm font-medium"
+        >
+          Excerpt
+        </label>
 
-                <textarea
-                  id="excerpt"
-                  name="excerpt"
-                  value={formData.excerpt}
-                  onChange={handleChange}
-                  placeholder="Write a short description of your post..."
-                  rows={3}
-                  required
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
-                />
-              </div>
+        <Input
+          id="excerpt"
+          name="excerpt"
+          value={formData.excerpt}
+          onChange={handleChange}
+          placeholder="Write a short excerpt for your post"
+        />
 
-            </div>
-          </section>
+        <p className="text-xs text-zinc-500">
+          A short description of your blog post.
+        </p>
+      </div>
 
-          {/* Content */}
-          <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold">
-                Content
-              </h2>
+    </div>
+  </section>
 
-              <p className="mt-1 text-sm text-zinc-500">
-                Write the content of your blog post.
-              </p>
-            </div>
+  {/* Content */}
+  <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="mb-6">
+      <h2 className="text-lg font-semibold">
+        Content
+      </h2>
 
-            <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              placeholder="Write your blog post here..."
-              rows={16}
-              required
-              className="flex w-full resize-y rounded-md border border-input bg-background px-3 py-3 text-sm leading-6 shadow-sm outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </section>
+      <p className="mt-1 text-sm text-zinc-500">
+        Write the content of your blog post.
+      </p>
+    </div>
+
+    <RichTextEditor
+      content={formData.content}
+      onChange={(content: string) =>
+        setFormData((prev) => ({
+          ...prev,
+          content,
+        }))
+      }
+    />
+  </section>
+
+      
 
           {/* Image */}
          <div className="space-y-2">

@@ -5,7 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import RichTextEditor from "@/components/admin/RichTextEditor";
+
 import { getToken } from "@/app/lib/auth-client";
+
 
 interface PostFormData {
   title: string;
@@ -38,7 +41,7 @@ export default function EditPostPage() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(`/api/posts/${id}`, {
+        const response = await fetch(`/api/admin/posts/${id}`, {
           headers: {
             Authorization: `Bearer ${getToken()}`,
           },
@@ -196,16 +199,15 @@ try {
               <label htmlFor="content" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                 Content
               </label>
-              <textarea
-                id="content"
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                placeholder="Write your blog post here..."
-                rows={10}
-                required
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus:ring-1 focus:ring-ring"
-              />
+             <RichTextEditor
+  content={formData.content}
+  onChange={(content: string) =>
+    setFormData((prev) => ({
+      ...prev,
+      content,
+    }))
+  }
+/>
             </div>
 
             <div>

@@ -4,13 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
-import { Button } from "@/app/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Input } from "@/app/components/ui/input";
-import { Toast, ToastViewport } from "@/app/components/ui/toast";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Toast, ToastViewport } from "@/components/ui/toast";
+
 import { EyeIcon, EyeOffIcon, ArrowRight, Handshake } from "lucide-react";
 import { setToken, setUser } from "@/app/lib/auth-client";
-
 const signupSchema = z
   .object({
     name: z

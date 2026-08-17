@@ -83,10 +83,10 @@ export default function DashboardPage() {
 
       try {
         const [statsRes, activityRes] = await Promise.all([
-          fetch("/api/admin/dashboard/stats", {
+          fetch("/api/dashboard/stats", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("/api/admin/dashboard/activity", {
+          fetch("/api/dashboard/activity", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -157,7 +157,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
-            Dashboard
+            
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">
             Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}.
@@ -169,76 +169,12 @@ export default function DashboardPage() {
             {error}
           </div>
         )}
-
-        {/* Statistics */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {statItems.map(({ label, value, icon: Icon }) => (
-            <div
-              key={label}
-              className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-zinc-500">{label}</p>
-                <Icon className="h-4 w-4 text-zinc-400" />
-              </div>
-
-              <p className="mt-3 text-2xl font-semibold tabular-nums">
-                {loading ? (
-                  <span className="inline-block h-7 w-10 animate-pulse rounded bg-zinc-100 dark:bg-zinc-800" />
-                ) : (
-                  (value ?? 0)
-                )}
-              </p>
-            </div>
-          ))}
-        </div>
-
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Recent Activity */}
-          <section className="rounded-lg border border-zinc-200 bg-white lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
-              <h2 className="text-sm font-semibold">Recent Activity</h2>
-            </div>
-
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {loading ? (
-                <div className="px-5 py-8 text-center text-sm text-zinc-400">
-                  Loading activity...
-                </div>
-              ) : activity.length === 0 ? (
-                <div className="px-5 py-8 text-center text-sm text-zinc-400">
-                  No activity yet.
-                </div>
-              ) : (
-                activity.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-start justify-between gap-4 px-5 py-3 transition hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-zinc-500">
-                        {ACTION_LABELS[item.action] ?? item.action}
-                      </p>
-                      <p className="truncate text-sm text-zinc-900 dark:text-zinc-100">
-                        {item.description}
-                      </p>
-                    </div>
-
-                    <span className="shrink-0 text-xs text-zinc-400">
-                      {formatDate(item.created_at)}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
           {/* Account */}
           <section className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
             <div className="border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
               <h2 className="text-sm font-semibold">Account</h2>
             </div>
-
             <div className="space-y-4 px-5 py-5">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
@@ -286,7 +222,6 @@ export default function DashboardPage() {
                     } total.`}
               </p>
             </div>
-
             <Link href="/dashboard/posts">
               <Button variant="outline" size="sm" className="gap-2">
                 Manage Posts
