@@ -5,11 +5,13 @@ import { useState } from "react";
 import { Mail, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [isSending, setIsSending] = useState(false);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +82,7 @@ export default function ContactPage() {
                       required
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="Your name"
+                      placeholder=""
                       className="rounded-xl border-zinc-200 bg-white placeholder:text-zinc-500 focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:placeholder:text-zinc-500"
                     />
                   </div>
@@ -94,7 +96,7 @@ export default function ContactPage() {
                       required
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="you@example.com"
+                      placeholder=""
                       className="rounded-xl border-zinc-200 bg-white placeholder:text-zinc-500 focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:placeholder:text-zinc-500"
                     />
                   </div>
@@ -103,14 +105,12 @@ export default function ContactPage() {
                     <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">
                       Message
                     </label>
-                    <textarea
-                      required
-                      rows={4}
-                      value={form.message}
-                      onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      placeholder="Your message..."
-                      className="w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-900 placeholder:text-zinc-500 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-                    />
+                     <RichTextEditor
+    content={form.message}
+    onChange={(message: string) =>
+      setForm((prev) => ({ ...prev, message }))
+    }
+  />
                   </div>
 
                   <Button
@@ -134,7 +134,7 @@ export default function ContactPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100">
                   <Mail className="h-4 w-4" />
                 </div>
-                <span>hello@example.com</span>
+                <span>basnetaavash7@gmail.com</span>
               </div>
             </div>
 

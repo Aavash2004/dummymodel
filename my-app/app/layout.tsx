@@ -17,6 +17,9 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Blogs",
   description: "A clean, modern, and minimalist web application.",
+  icons: {
+    icon: "/nep.webp"
+  }
 };
 
 export default function RootLayout({

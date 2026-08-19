@@ -81,6 +81,16 @@ export default function EditPostPage() {
       [name]: value,
     }));
   };
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setFormData((prev) => ({ ...prev, featuredImage: reader.result as string }));
+  };
+  reader.readAsDataURL(file);
+};
 
   const handleSubmit = async (e: FormEvent) => {
   e.preventDefault();
@@ -214,13 +224,30 @@ try {
               <label htmlFor="featuredImage" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                 Featured Image URL
               </label>
+              {formData.featuredImage ? (
+    <div className="relative mb-2 w-full overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+      <img
+        src={formData.featuredImage}
+        alt="Featured preview"
+        className="h-40 w-full object-cover"
+      />
+      <button
+        type="button"
+        onClick={() => setFormData((prev) => ({ ...prev, featuredImage: "" }))}
+        className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs text-white hover:bg-black/80"
+      >
+        Remove
+      </button>
+    </div>
+  ) : null}
+
               <Input
-                id="featuredImage"
-                name="featuredImage"
-                value={formData.featuredImage}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-              />
+    id="featuredImage"
+    name="featuredImage"
+    type="file"
+    accept="image/*"
+    onChange={handleImageUpload}
+  />
             </div>
 
             <div>
