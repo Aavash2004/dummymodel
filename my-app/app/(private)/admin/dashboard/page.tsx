@@ -287,7 +287,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <Link href="/dashboard/posts">
+            <Link href="/admin/posts">
               <Button variant="outline" size="sm" className="gap-2">
                 Manage Posts
                 <ArrowRight className="h-4 w-4" />

@@ -12,13 +12,16 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 
-const privateLinks = [
+const baseLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/profile", label: "Profile", icon: User },
   { href: "/settings", label: "Settings", icon: Settings },
-  {href:"/blogs", label:"Blogs", icon:LucideCamera},
 ];
 
+const adminLinks = [
+  { href: "/admin/dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
+  { href: "/admin/posts", label: "Manage Posts", icon: LucideCamera },
+];
 function getInitials(name?: string | null) {
   if (!name) return "?";
   return name
@@ -43,6 +46,10 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
     setThemeMounted(true);
   }, []);
 
+  const privateLinks =
+    user?.role === "admin" ? [...baseLinks, ...adminLinks] : baseLinks;
+
+    
   useEffect(() => {
     const token = getToken();
     if (!token) {

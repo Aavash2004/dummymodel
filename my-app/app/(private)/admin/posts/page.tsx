@@ -84,7 +84,7 @@ export default function BlogsPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/posts", {
+      const res = await fetch("/api/admin/posts", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

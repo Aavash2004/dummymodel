@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Mail, CheckCircle2 } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });

@@ -80,9 +80,8 @@ export default function LoginPage() {
       if (data.user) {
         setUser(data.user);
       }
-
       setToast({ message: "Logged in successfully.", type: "success" });
-      router.push("/dashboard");
+      router.push(data.user?.role === "admin" ? "/admin/dashboard" : "/dashboard");
     } catch {
       setToast({ message: "Unable to reach the server right now.", type: "error" });
       setIsSubmitting(false);
