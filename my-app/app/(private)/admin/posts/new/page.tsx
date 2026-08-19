@@ -111,7 +111,7 @@ const [imageError, setImageError] = useState("");
     const body = new FormData();
     body.append("image", file);
 
-    const res = await fetch("/api/admin/posts/upload-image", {
+    const res = await fetch("/api/posts/upload-image", {
       method: "POST",
       headers: { Authorization: `Bearer ${getToken()}` },
       body,

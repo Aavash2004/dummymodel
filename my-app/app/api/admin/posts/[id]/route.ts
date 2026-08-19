@@ -31,9 +31,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const payload = verifyToken(request.headers.get("authorization"));
+    const payload = verifyToken(request.headers.get("authorization"));
   if (!payload) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (payload.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { id: idParam } = await params;
@@ -58,9 +61,12 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const payload = verifyToken(request.headers.get("authorization"));
+    const payload = verifyToken(request.headers.get("authorization"));
   if (!payload) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (payload.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { id: idParam } = await params;
@@ -122,9 +128,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const payload = verifyToken(request.headers.get("authorization"));
+    const payload = verifyToken(request.headers.get("authorization"));
   if (!payload) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (payload.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { id: idParam } = await params;

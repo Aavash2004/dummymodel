@@ -20,11 +20,13 @@ const createPostSchema = z.object({
   message: "Status must be DRAFT or PUBLISHED.",
 }),
 });
-
 export async function GET(request: NextRequest) {
   const payload = verifyToken(request.headers.get("authorization"));
   if (!payload) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (payload.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {

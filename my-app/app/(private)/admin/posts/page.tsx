@@ -250,7 +250,7 @@ export default function BlogsPage() {
 
           <Button
             onClick={() =>
-              router.push("/dashboard/posts/new")
+              router.push("/admin/posts/new")
             }
             className="w-fit gap-2"
           >
@@ -398,7 +398,7 @@ export default function BlogsPage() {
                       className="mt-4"
                       onClick={() =>
                         router.push(
-                          "/dashboard/posts/new"
+                          "/admin/posts/new"
                         )
                       }
                     >
@@ -455,7 +455,7 @@ export default function BlogsPage() {
                         type="button"
                         onClick={() =>
                           router.push(
-                            `/dashboard/posts/${post.id}/edit`
+                            `/admin/posts/${post.id}/edit`
                           )
                         }
                         className="text-xs font-medium text-zinc-600 hover:text-zinc-900"
@@ -523,7 +523,7 @@ export default function BlogsPage() {
                         <DropdownMenuItem
                           onClick={() =>
                             router.push(
-                              `/dashboard/posts/${post.id}/edit`
+                              `/admin/posts/${post.id}/edit`
                             )
                           }
                         >
