@@ -3,7 +3,7 @@ import { getToken, getUser, clearToken, clearUser, type StoredUser } from "@/app
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, User, Settings, LogOut, Handshake, Menu, X, LucideCamera } from "lucide-react";
+import { LayoutDashboard, User, Settings, LogOut, Handshake, Menu, X, LucideCamera, CameraIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import {
@@ -49,7 +49,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
   const privateLinks =
     user?.role === "admin" ? [...baseLinks, ...adminLinks] : baseLinks;
 
-    
+
   useEffect(() => {
     const token = getToken();
     if (!token) {
@@ -94,9 +94,9 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
       <aside className="hidden w-64 flex-col border-r border-white/40 bg-white/60 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/50 sm:flex">
         <div className="flex items-center gap-2 border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-            <Handshake className="h-4 w-4" />
+            <CameraIcon className="h-4 w-4" />
           </div>
-          <span className="font-bold tracking-tight text-zinc-950 dark:text-white">Intern App</span>
+          <span className="font-bold tracking-tight text-zinc-950 dark:text-white">Blogs</span>
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -182,7 +182,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
               <Handshake className="h-4 w-4" />
             </div>
-            <span className="font-bold tracking-tight text-zinc-950 dark:text-white">Intern App</span>
+            <span className="font-bold tracking-tight text-zinc-950 dark:text-white">Blogs</span>
           </div>
           <button
             type="button"
@@ -262,7 +262,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
               <Handshake className="h-4 w-4" />
             </div>
-            <span className="text-sm font-bold text-zinc-950 dark:text-white">Intern App</span>
+            <span className="text-sm font-bold text-zinc-950 dark:text-white">Blogs</span>
           </div>
 
           <button

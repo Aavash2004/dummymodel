@@ -15,7 +15,7 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Intern App",
+  title: "Blogs",
   description: "A clean, modern, and minimalist web application.",
 };
 

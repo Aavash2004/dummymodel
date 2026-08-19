@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Handshake } from "lucide-react";
+import { Handshake, CameraIcon } from "lucide-react";
 
 export function Footer() {
   return (
@@ -9,9 +9,9 @@ export function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 text-sm sm:flex-row">
         <div className="flex items-center gap-2 font-medium text-zinc-900 dark:text-zinc-100">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950 text-white">
-            <Handshake className="h-3.5 w-3.5" />
+            < CameraIcon className="h-3.5 w-3.5" />
           </div>
-          <span>Intern App</span>
+          <span>Blogs</span>
           <span className="text-zinc-400">•</span>
           <span className="text-xs text-zinc-500">© {new Date().getFullYear()}</span>
         </div>

@@ -131,7 +131,7 @@ router.push("/auth/login");
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
             <Handshake className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">Intern App</span>
+          <span className="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">Blogs</span>
         </div>
 
         <Card className="border border-zinc-200/80 bg-white p-0 shadow-md rounded-3xl dark:border-zinc-800 dark:bg-zinc-900">

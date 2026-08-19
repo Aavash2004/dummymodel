@@ -253,7 +253,7 @@ export function Navbar() {
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
                   <Handshake className="h-4 w-4" />
                 </div>
-                <span className="font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Intern App</span>
+                <span className="font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Blogs</span>
               </Link>
               <button
                 type="button"
